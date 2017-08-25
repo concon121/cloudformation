@@ -1,0 +1,10 @@
+PipelinePolicyName=CBCFPolicy
+PipelineRoleName=CBCFRole
+PipelineName=CBCFPipeline
+BuildProjectName=CBCFBuild
+CodeCommitProject=cb-test
+S3Bucket=https://s3-eu-west-1.amazonaws.com/pru-cloudformation-templates
+DevBucketName=dev.spacegoats.co.uk
+ProdBucketName=prod.spacegoats.co.uk
+StagingBucketName=cbcf-staging
+RootDomainZoneID=Z3P3H2NORORNMS

@@ -1,0 +1,42 @@
+[
+  {
+    "ParameterKey": "PipelinePolicyName",
+    "ParameterValue": "CBCFPolicy"
+  },
+  {
+    "ParameterKey": "PipelineRoleName",
+    "ParameterValue": "CBCFRole"
+  },
+  {
+    "ParameterKey": "PipelineName",
+    "ParameterValue": "CBCFPipeline"
+  },
+  {
+    "ParameterKey": "BuildProjectName",
+    "ParameterValue": "CBCFBuild"
+  },
+  {
+    "ParameterKey": "CodeCommitProject",
+    "ParameterValue": "cb-test"
+  },
+  {
+    "ParameterKey": "S3Bucket",
+    "ParameterValue": "https://s3-eu-west-1.amazonaws.com/pru-cloudformation-templates"
+  },
+  {
+    "ParameterKey": "DevBucketName",
+    "ParameterValue": "dev.spacegoats.co.uk"
+  },
+  {
+    "ParameterKey": "ProdBucketName",
+    "ParameterValue": "prod.spacegoats.co.uk"
+  },
+  {
+    "ParameterKey": "StagingBucketName",
+    "ParameterValue": "cbcf-staging"
+  },
+  {
+    "ParameterKey": "RootDomainZoneID",
+    "ParameterValue": "Z3P3H2NORORNMS"
+  }
+]

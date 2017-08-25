@@ -1,0 +1,58 @@
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:eu-west-1:977855701381:stack/CBCFStack/9ae2be20-898b-11e7-a9e7-500c42421e36",
+            "StackName": "CBCFStack",
+            "Parameters": [
+                {
+                    "ParameterKey": "BuildProjectName",
+                    "ParameterValue": "CBCFBuild"
+                },
+                {
+                    "ParameterKey": "PipelinePolicyName",
+                    "ParameterValue": "CBCFPolicy"
+                },
+                {
+                    "ParameterKey": "RootDomainZoneID",
+                    "ParameterValue": "Z3P3H2NORORNMS"
+                },
+                {
+                    "ParameterKey": "S3Bucket",
+                    "ParameterValue": "https://s3-eu-west-1.amazonaws.com/pru-cloudformation-templates"
+                },
+                {
+                    "ParameterKey": "PipelineName",
+                    "ParameterValue": "CBCFPipeline"
+                },
+                {
+                    "ParameterKey": "CodeCommitProject",
+                    "ParameterValue": "cb-test"
+                },
+                {
+                    "ParameterKey": "ProdBucketName",
+                    "ParameterValue": "prod.spacegoats.co.uk"
+                },
+                {
+                    "ParameterKey": "StagingBucketName",
+                    "ParameterValue": "cbcf-staging"
+                },
+                {
+                    "ParameterKey": "PipelineRoleName",
+                    "ParameterValue": "CBCFRole"
+                },
+                {
+                    "ParameterKey": "DevBucketName",
+                    "ParameterValue": "dev.spacegoats.co.uk"
+                }
+            ],
+            "CreationTime": "2017-08-25T11:50:35.096Z",
+            "StackStatus": "ROLLBACK_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_NAMED_IAM"
+            ],
+            "Tags": []
+        }
+    ]
+}
