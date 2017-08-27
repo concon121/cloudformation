@@ -2,23 +2,14 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  PipelinePolicyName:
-    Description: Name of the security policy
+  ProjectName:
+    Description: The name of the project
     Type: String
   DevBucketName:
     Description: S3 bucket for dev app
     Type: String
   ProdBucketName:
     Description: S3 bucket for prod app
-    Type: String
-  PipelineRoleName:
-    Description: Name of the security Role
-    Type: String
-  PipelineName:
-    Description: Name of the pipeline
-    Type: String
-  BuildProjectName:
-    Description: Name of the build project
     Type: String
   CodeCommitProject:
     Description: The name of the AWS Code Commit project to build
@@ -32,6 +23,14 @@ Parameters:
   RootDomainZoneID:
     Description: The zone ID of the root domain
     Type: String
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+  WebsiteRootDirectory:
+    Description: The directory in code commit containing the index file
+    Type: String
+    Default: '.'
 
 Resources:
 
@@ -47,6 +46,7 @@ Resources:
       Parameters:<% if bucket['type'] == 'www' %>
         NewSubDomain: !Ref '<%= bucket['param'] %>'
         RootDomainZoneID: !Ref 'RootDomainZoneID'
+        IndexDocument: !Ref 'IndexDocument'
         <% else %>
         Name: !Ref '<%= bucket['param'] %>'
         <% end %>
@@ -68,11 +68,11 @@ Resources:
       TemplateURL: !Join ['/', [!Ref 'S3Bucket', 'templates', 'iam', 'pipeline-iam.template']]
       TimeoutInMinutes: "60"
       Parameters:
-        RoleName: !Join ['-', [!Ref 'PipelineRoleName', '<%= environment['tag'] %>']]
-        PolicyName: !Join ['-', [!Ref 'PipelinePolicyName', '<%= environment['tag'] %>']]
-        BuildProjectName: !Join ['-', [!Ref 'BuildProjectName', '<%= environment['tag'] %>']]
+        RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]
+        PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= environment['tag'] %>']]
+        BuildProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
         CodeCommitProject: !Ref 'CodeCommitProject'
-        PipelineName: !Join ['-', [!Ref 'PipelineName', '<%= environment['tag'] %>']]
+        PipelineName: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= environment['tag'] %>']]
         S3AppBucket: <%= environment['appBucket'] %>
         S3StagingBucket: <%= environment['stagingBucket'] %>
 
@@ -88,10 +88,11 @@ Resources:
       TemplateURL: !Join ['/', [!Ref 'S3Bucket', 'templates', 'codebuild', 's3-upload.template']]
       TimeoutInMinutes: "60"
       Parameters:
-        Name: !Ref 'BuildProjectName'
+        Name: !Ref 'ProjectName'
         Environment: '<%= environment['tag'] %>'
         S3Bucket: <%= environment['appBucket'] %>
-        RoleName: !Join ['-', [!Ref 'PipelineRoleName', '<%= environment['tag'] %>']]
+        RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]
+        RootDirectory: !Ref 'WebsiteRootDirectory'
 
   # ---------------------------------------------------------------------------
   # Pipeline definition: <%= environment['tag'] %>
@@ -102,8 +103,8 @@ Resources:
     DependsOn:<% pipeline['dependencies'].each do |dependency| %>
       - '<%= dependency %>'<% end %>
     Properties:
-      Name: !Join ['-', [!Ref 'PipelineName', '<%= environment['tag'] %>']]
-      RoleArn: !Join ['/', ['arn:aws:iam::977855701381:role', !Join ['-', [!Ref 'PipelineRoleName', '<%= environment['tag'] %>']]]]
+      Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= environment['tag'] %>']]
+      RoleArn: !Join ['/', ['arn:aws:iam::977855701381:role', !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]]]
       ArtifactStore:
         Location: <%= environment['stagingBucket'] %>
         Type: "S3"
@@ -135,7 +136,7 @@ Resources:
                 Version: "1"
               RunOrder: 1
               Configuration:
-                ProjectName: !Join ['-', [!Ref 'BuildProjectName', '<%= environment['tag'] %>']]
+                ProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
               InputArtifacts:
                 - Name: "app-source"
 <% end %>
