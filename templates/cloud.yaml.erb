@@ -5,23 +5,17 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
-  DevBucketName:
-    Description: S3 bucket for dev app
-    Type: String
-  ProdBucketName:
-    Description: S3 bucket for prod app
-    Type: String
   CodeCommitProject:
     Description: The name of the AWS Code Commit project to build
-    Type: String
-  S3Bucket:
-    Description: The URI for the S3 bucket containing the templates
     Type: String
   StagingBucketName:
     Description: The name of the staging s3 bucket for development
     Type: String
   RootDomainZoneID:
     Description: The zone ID of the root domain
+    Type: String
+  RootDomain:
+    Description: The root domain
     Type: String
   IndexDocument:
     Description: The index document for static S3 websites
@@ -32,24 +26,24 @@ Parameters:
     Type: String
     Default: '.'
 
+Mappings:
+<%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
+  Helpers:
+    <% @environments.each do |environment| %>
+    <%= environment['tag'] %>:
+      AppBucketName: !Join ['.', [<%= environment['tag'] %>, !Ref 'RootDomain']]
+    <% end %>
 Resources:
 
 # =============================================================================
 # S3 Buckets
 # =============================================================================
 <% @buckets.each do |bucket| %>
-  <%= bucket['name'] %>:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join ['/', [!Ref 'S3Bucket', 'templates', 's3', '<%= bucket['type'] %>-bucket.template']]
-      TimeoutInMinutes: "60"
-      Parameters:<% if bucket['type'] == 'www' %>
-        NewSubDomain: !Ref '<%= bucket['param'] %>'
-        RootDomainZoneID: !Ref 'RootDomainZoneID'
-        IndexDocument: !Ref 'IndexDocument'
-        <% else %>
-        Name: !Ref '<%= bucket['param'] %>'
-        <% end %>
+  <% if bucket['type'] == 'www' %>
+<%= partial('s3/www-bucket.yaml.erb', id: bucket['id'], environment: bucket['environment']) %>
+  <% else %>
+<%= partial('s3/default-bucket.yaml.erb', id: bucket['logicalId'], name: bucket['name']) %>
+  <% end %>
 <% end %>
 
 <% @environments.each do |environment| %>
@@ -57,86 +51,18 @@ Resources:
 # =============================================================================
 # Environment: <%= environment['tag'] %>
 # =============================================================================
-
-  <% role=environment['role'] %>
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-  <%= role['name'] %>:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join ['/', [!Ref 'S3Bucket', 'templates', 'iam', 'pipeline-iam.template']]
-      TimeoutInMinutes: "60"
-      Parameters:
-        RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]
-        PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= environment['tag'] %>']]
-        BuildProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
-        CodeCommitProject: !Ref 'CodeCommitProject'
-        PipelineName: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= environment['tag'] %>']]
-        S3AppBucket: <%= environment['appBucket'] %>
-        S3StagingBucket: <%= environment['stagingBucket'] %>
-
-  <% build=environment['build'] %>
+<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag']) %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-  <%= build['name'] %>:
-    Type: "AWS::CloudFormation::Stack"
-    DependsOn:<% build['dependencies'].each do |dependency| %>
-      - '<%= dependency %>'<% end %>
-    Properties:
-      TemplateURL: !Join ['/', [!Ref 'S3Bucket', 'templates', 'codebuild', 's3-upload.template']]
-      TimeoutInMinutes: "60"
-      Parameters:
-        Name: !Ref 'ProjectName'
-        Environment: '<%= environment['tag'] %>'
-        S3Bucket: <%= environment['appBucket'] %>
-        RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]
-        RootDirectory: !Ref 'WebsiteRootDirectory'
-
+<%= partial('codebuild/s3-upload.yaml.erb', id: environment['id'], tag: environment['tag']) %>
   # ---------------------------------------------------------------------------
   # Pipeline definition: <%= environment['tag'] %>
   # ---------------------------------------------------------------------------
   <% pipeline=environment['pipeline'] %>
-  <%= pipeline['name'] %>:
-    Type: "AWS::CodePipeline::Pipeline"
-    DependsOn:<% pipeline['dependencies'].each do |dependency| %>
-      - '<%= dependency %>'<% end %>
-    Properties:
-      Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= environment['tag'] %>']]
-      RoleArn: !Join ['/', ['arn:aws:iam::977855701381:role', !Join ['-', [!Ref 'ProjectName', 'Role', '<%= environment['tag'] %>']]]]
-      ArtifactStore:
-        Location: <%= environment['stagingBucket'] %>
-        Type: "S3"
-      Stages:
-        - Name: "Source"
-          Actions:
-            - Name: "ApplicationSource"
-              ActionTypeId:
-                Category: "Source"
-                Owner: "AWS"
-                Provider: "CodeCommit"
-                Version: "1"
-              RunOrder: 1
-              Configuration:
-                BranchName: "<%= pipeline['branch'] %>"
-                RepositoryName: !Ref 'CodeCommitProject'
-                <% if pipeline['isManual'] %>
-                PollForSourceChanges: 'false'
-                <% end %>
-              OutputArtifacts:
-                - Name: "app-source"
-        - Name: "Build"
-          Actions:
-            - Name: "Deployment"
-              ActionTypeId:
-                Category: "Build"
-                Owner: "AWS"
-                Provider: "CodeBuild"
-                Version: "1"
-              RunOrder: 1
-              Configuration:
-                ProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
-              InputArtifacts:
-                - Name: "app-source"
+<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', id: environment['id'], tag: environment['tag'], branch: pipeline['branch'], isManual: pipeline['isManual'], buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{environment['tag']}]]") %>
+
 <% end %>

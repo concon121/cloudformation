@@ -1,0 +1,15 @@
+  Pipeline<%= @id %>:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
+      RoleArn: !Sub
+             - arn:aws:iam::${Account}:role/${RoleName}
+             - Account: !Ref 'AWS::AccountId'
+               RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>']]
+      ArtifactStore:
+        Location:
+          Ref: 'StagingBucket'
+        Type: "S3"
+      Stages:
+<%= partial('codepipeline/stages/codecommit.yaml.erb', branch: @branch, isManual: @isManual) %>
+<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', buildName: "S3UploadBuild#{@id}") %>

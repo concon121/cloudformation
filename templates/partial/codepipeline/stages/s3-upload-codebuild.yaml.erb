@@ -1,0 +1,14 @@
+        - Name: "Build"
+          Actions:
+            - Name: "Deployment"
+              ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Provider: "CodeBuild"
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                ProjectName:
+                  Ref: <%= @buildName %>
+              InputArtifacts:
+                - Name: "app-source"

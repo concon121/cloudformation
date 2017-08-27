@@ -1,5 +1,14 @@
 #!/bin/bash
 
+WORKING_DIR="$1"
+
+if [[ -z "${WORKING_DIR}" ]]
+then
+  WORKING_DIR="."
+fi
+
+cd $WORKING_DIR
+
 . variables.sh
 
 lono generate
@@ -46,7 +55,7 @@ then
   --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export.yaml" \
   --stack-name ${STACK_NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://output/params/params.json
+  --parameters file://${WORKING_DIR}/output/params/params.json
 elif [[ *"${stackExists}"* != "IN_PROGRESS" ]]
 then
   echo "Updating the stack: ${STACK_NAME}"
@@ -57,7 +66,7 @@ then
   --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export.yaml" \
   --stack-name ${STACK_NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://output/params/params.json
+  --parameters file://${WORKING_DIR}/output/params/params.json
 else
   echo "Work in progress, please try again later: ${stackExists}"
 fi

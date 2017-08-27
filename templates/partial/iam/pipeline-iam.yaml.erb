@@ -1,0 +1,99 @@
+  PipelineRole<%= @id %>:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>']]
+      AssumeRolePolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+          - Sid: "1"
+            Effect: "Allow"
+            Principal:
+              Service: "codepipeline.amazonaws.com"
+            Action: "sts:AssumeRole"
+          - Sid: "2"
+            Effect: "Allow"
+            Principal:
+              Service: "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
+  PipelinePolicy<%= @id %>:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>']]
+      Roles:
+        - Ref: PipelineRole<%= @id %>
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource:
+              - !Join [':', [!Join ['/', [!Join [':', ['arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/codebuild']], !Ref 'BuildProjectName']], 'log-stream', '*']]
+            Effect: "Allow"
+          - Action:
+              - "s3:PutObject"
+              - "s3:PutObjectAcl"
+              - "s3:GetObject"
+              - "s3:GetObjectVersion"
+            Resource:
+              - Ref: AppBucket<%= @id %>
+              - !Join [':::', ['arn:aws:s3', !Join ['/', [!Ref 'StagingBucketName', '*']]]]
+            Effect: "Allow"
+          - Action:
+              - "codecommit:GitPull"
+              - "codecommit:CancelUploadArchive"
+              - "codecommit:GetBranch"
+              - "codecommit:GetCommit"
+              - "codecommit:GetUploadArchiveStatus"
+              - "codecommit:UploadArchive"
+            Resource:
+              - !Join [':', [!Join [':', ['arn:aws:codecommit', !Ref 'AWS::Region', !Ref 'AWS::AccountId']], !Ref 'CodeCommitProject']]
+            Effect: "Allow"
+          - Action:
+              - "kms:GenerateDataKey*"
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+            Resource:
+              - !Join [':', ["arn:aws:kms", !Ref 'AWS::Region', !Ref 'AWS::AccountId', "alias/aws/s3"]]
+            Effect: "Allow"
+          - Action:
+              - "codebuild:StartBuild"
+              - "codebuild:BatchGetBuilds"
+              - "codebuild:StopBuild"
+            Resource:
+              - !Join ['/', [!Join [':', ['arn:aws:codebuild', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'project']], !Ref 'BuildProjectName']]
+            Effect: "Allow"
+  PipelineDeployRole<%= @id %>:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>', 'deploy']]
+      AssumeRolePolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+          - Sid: "1"
+            Effect: "Allow"
+            Principal:
+              Service: "codepipeline.amazonaws.com"
+            Action: "sts:AssumeRole"
+  PipelineDeployPolicy<%= @id %>:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>', 'deploy']]
+      Roles:
+        - Ref: PipelineDeployRole<%= @id %>
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "codepipeline:GetPipeline"
+              - "codepipeline:GetJobDetails"
+              - "codepipeline:GetPipelineState"
+              - "codepipeline:ListPipelines"
+              - "codepipeline:StartPipelineExecution"
+              - "codepipeline:PutJobSuccessResult"
+              - "codepipeline:PutJobFailureResult"
+              - "codepipeline:RetryStageExecution"
+            Resource:
+              - !Join [':', [!Join [':', ['arn:aws:codepipeline', !Ref 'AWS::Region', !Ref 'AWS::AccountId']], !Ref 'PipelineName']]
+            Effect: "Allow"
