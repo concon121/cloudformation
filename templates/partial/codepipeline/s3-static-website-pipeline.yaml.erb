@@ -1,4 +1,4 @@
-  Pipeline<%= @id %>:
+  S3StaticWebsitePipeline<%= @id %>:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
       Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]

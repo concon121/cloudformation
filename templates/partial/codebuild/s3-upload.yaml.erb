@@ -1,7 +1,9 @@
+<%= partial('s3/www-bucket.yaml.erb', id: @id, tag: @tag) %>
+
   S3UploadBuild<%= @id %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
+      Name: !FindInMap [Helpers, <%= @tag %>, BuildProjectName]
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"

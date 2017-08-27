@@ -32,6 +32,7 @@ Mappings:
     <% @environments.each do |environment| %>
     <%= environment['tag'] %>:
       AppBucketName: !Join ['.', [<%= environment['tag'] %>, !Ref 'RootDomain']]
+      BuildProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
     <% end %>
 Resources:
 
@@ -39,11 +40,7 @@ Resources:
 # S3 Buckets
 # =============================================================================
 <% @buckets.each do |bucket| %>
-  <% if bucket['type'] == 'www' %>
-<%= partial('s3/www-bucket.yaml.erb', id: bucket['id'], environment: bucket['environment']) %>
-  <% else %>
 <%= partial('s3/default-bucket.yaml.erb', id: bucket['logicalId'], name: bucket['name']) %>
-  <% end %>
 <% end %>
 
 <% @environments.each do |environment| %>
@@ -54,7 +51,7 @@ Resources:
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag']) %>
+<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag'], codebuildId: 'S3UploadBuild', pipelineId: 'S3StaticWebsitePipeline') %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------

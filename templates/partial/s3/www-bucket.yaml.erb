@@ -2,7 +2,7 @@
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: PublicReadWrite
-      BucketName: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+      BucketName: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
       VersioningConfiguration:
         Status: 'Enabled'
       WebsiteConfiguration:
@@ -27,7 +27,7 @@
       AccessControl: PublicReadWrite
       BucketName: !Sub
             - www.${Domain}
-            - Domain: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+            - Domain: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
       WebsiteConfiguration:
         RedirectAllRequestsTo:
           HostName:
@@ -41,7 +41,7 @@
       HostedZoneTags:
         - Key: 'Test'
           Value: 'Route'
-      Name: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+      Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
 
   WebsiteCloudfront<%= @id %>:
     Type: AWS::CloudFront::Distribution
@@ -51,7 +51,7 @@
       DistributionConfig:
         Comment: Cloudfront Distribution pointing to S3 bucket
         Origins:
-        - DomainName: !Join [., [!FindInMap [Helpers, <%= @environment %>, AppBucketName], !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
+        - DomainName: !Join [., [!FindInMap [Helpers, <%= @tag %>, AppBucketName], !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
           Id: S3Origin
           CustomOriginConfig:
             HTTPPort: '80'
@@ -61,7 +61,7 @@
         HttpVersion: 'http2'
         DefaultRootObject: !Ref 'IndexDocument'
         Aliases:
-        - !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+        - !FindInMap [Helpers, <%= @tag %>, AppBucketName]
         DefaultCacheBehavior:
           AllowedMethods:
           - GET
@@ -84,12 +84,12 @@
       RecordSets:
         - Name: !Sub
               - www.${Domain}
-              - Domain: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+              - Domain: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
             DNSName: !GetAtt [WebsiteCloudfront<%= @id %>, DomainName]
-        - Name: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+        - Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
@@ -101,7 +101,7 @@
       - DefaultZone<%= @id %>
     Properties:
       HostedZoneId: !Ref 'RootDomainZoneID'
-      Name: !FindInMap [Helpers, <%= @environment %>, AppBucketName]
+      Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
       Type: 'NS'
       TTL: 900
       ResourceRecords: !GetAtt DefaultZone<%= @id %>.NameServers

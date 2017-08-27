@@ -29,7 +29,7 @@
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
             Resource:
-              - !Join [':', [!Join ['/', [!Join [':', ['arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/codebuild']], !Ref 'BuildProjectName']], 'log-stream', '*']]
+              - !Join [':', [!Join ['/', [!Join [':', ['arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/codebuild']], !FindInMap [Helpers, <%= @tag %>, BuildProjectName]]], 'log-stream', '*']]
             Effect: "Allow"
           - Action:
               - "s3:PutObject"
@@ -62,7 +62,7 @@
               - "codebuild:BatchGetBuilds"
               - "codebuild:StopBuild"
             Resource:
-              - !Join ['/', [!Join [':', ['arn:aws:codebuild', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'project']], !Ref 'BuildProjectName']]
+              - Ref: <%= "#{@codebuildId}#{@id}" %>
             Effect: "Allow"
   PipelineDeployRole<%= @id %>:
     Type: "AWS::IAM::Role"
@@ -95,5 +95,5 @@
               - "codepipeline:PutJobFailureResult"
               - "codepipeline:RetryStageExecution"
             Resource:
-              - !Join [':', [!Join [':', ['arn:aws:codepipeline', !Ref 'AWS::Region', !Ref 'AWS::AccountId']], !Ref 'PipelineName']]
+              - Ref: <%= "#{@pipelineId}#{@id}" %>
             Effect: "Allow"
