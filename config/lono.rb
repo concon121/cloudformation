@@ -11,19 +11,19 @@ dev = {
   }
 }
 
-prod = {
-  'id' => 'Production',
-  'tag' => 'prod',
-  'pipeline' => {
-    'branch' => 'master',
-    'isManual' => true
-  }
-}
+# prod = {
+#  'id' => 'Production',
+#  'tag' => 'prod',
+#  'pipeline' => {
+#    'branch' => 'master',
+#    'isManual' => true
+#  }
+# }
 
 template 'cloud.yaml' do
   source 'cloud.yaml.erb'
   variables(
     'buckets' => s3,
-    'environments' => [dev, prod]
+    'environments' => [dev]
   )
 end

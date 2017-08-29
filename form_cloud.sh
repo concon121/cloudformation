@@ -19,11 +19,11 @@ function setUp() {
   echo "Packaging cloudformation template..."
   aws cloudformation package --template-file output/cloud.yaml --output-template export.yaml --s3-bucket ${S3_BUCKET}
 
-  echo "Uploading cloud formation templates to S3..."
-  currentDir=`pwd`
-  cd ../cloudformation-templates && ./upload.sh && cd $currentDir
+  #  echo "Uploading cloud formation templates to S3..."
+  #  currentDir=`pwd`
+  #  cd ../cloudformation-templates && ./upload.sh && cd $currentDir
 
-  pwd
+  #  pwd
 
   echo "Uploading template to S3 bucket..."
   aws s3 cp export.yaml "s3://${S3_BUCKET}/export.yaml"

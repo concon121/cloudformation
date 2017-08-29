@@ -2,7 +2,7 @@
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: PublicReadWrite
-      BucketName: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+      BucketName: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
       VersioningConfiguration:
         Status: 'Enabled'
       WebsiteConfiguration:
@@ -23,11 +23,12 @@
 
   WebsiteBucket<%= @id %>:
     Type: "AWS::S3::Bucket"
+    Condition: 'CreateSubDomains'
     Properties:
       AccessControl: PublicReadWrite
       BucketName: !Sub
             - www.${Domain}
-            - Domain: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+            - Domain: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
       WebsiteConfiguration:
         RedirectAllRequestsTo:
           HostName:
@@ -35,23 +36,25 @@
 
   DefaultZone<%= @id %>:
     Type: "AWS::Route53::HostedZone"
+    Condition: 'CreateSubDomains'
     Properties:
       HostedZoneConfig:
         Comment: 'This is a brand new hosted zone'
       HostedZoneTags:
         - Key: 'Test'
           Value: 'Route'
-      Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+      Name: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
 
   WebsiteCloudfront<%= @id %>:
     Type: AWS::CloudFront::Distribution
+    Condition: 'CreateSubDomains'
     DependsOn:
     - WebsiteBucket<%= @id %>
     Properties:
       DistributionConfig:
         Comment: Cloudfront Distribution pointing to S3 bucket
         Origins:
-        - DomainName: !Join [., [!FindInMap [Helpers, <%= @tag %>, AppBucketName], !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
+        - DomainName: !Join [., [!Join ['.', [<%= @tag %>, !Ref 'RootDomain']], !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
           Id: S3Origin
           CustomOriginConfig:
             HTTPPort: '80'
@@ -61,7 +64,7 @@
         HttpVersion: 'http2'
         DefaultRootObject: !Ref 'IndexDocument'
         Aliases:
-        - !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+        - !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
         DefaultCacheBehavior:
           AllowedMethods:
           - GET
@@ -77,6 +80,7 @@
 
   DefaultDNS<%= @id %>:
     Type: "AWS::Route53::RecordSetGroup"
+    Condition: 'CreateSubDomains'
     Properties:
       HostedZoneName:
         Ref: DefaultZone<%= @id %>
@@ -84,24 +88,25 @@
       RecordSets:
         - Name: !Sub
               - www.${Domain}
-              - Domain: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+              - Domain: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
             DNSName: !GetAtt [WebsiteCloudfront<%= @id %>, DomainName]
-        - Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+        - Name: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
             DNSName: !GetAtt [WebsiteCloudfront<%= @id %>, DomainName]
 
   SubDomainNS<%= @id %>:
+    Condition: 'CreateSubDomains'
     Type: 'AWS::Route53::RecordSet'
     DependsOn:
       - DefaultZone<%= @id %>
     Properties:
       HostedZoneId: !Ref 'RootDomainZoneID'
-      Name: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+      Name: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
       Type: 'NS'
       TTL: 900
       ResourceRecords: !GetAtt DefaultZone<%= @id %>.NameServers

@@ -14,6 +14,7 @@ Parameters:
   RootDomainZoneID:
     Description: The zone ID of the root domain
     Type: String
+    Default: ''
   RootDomain:
     Description: The root domain
     Type: String
@@ -28,12 +29,10 @@ Parameters:
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
-  Helpers:
-    <% @environments.each do |environment| %>
-    <%= environment['tag'] %>:
-      AppBucketName: !Join ['.', [<%= environment['tag'] %>, !Ref 'RootDomain']]
-      BuildProjectName: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= environment['tag'] %>']]
-    <% end %>
+
+Conditions:
+<%= partial('conditions/s3-static-website-conditions.yaml.erb', {}) %>
+
 Resources:
 
 # =============================================================================
@@ -51,7 +50,7 @@ Resources:
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag'], codebuildId: 'S3UploadBuild', pipelineId: 'S3StaticWebsitePipeline') %>
+<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag'], pipelineId: 'S3StaticWebsitePipeline', codebuildId: 'S3UploadBuild') %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------

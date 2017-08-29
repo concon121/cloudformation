@@ -28,8 +28,11 @@
               - "logs:CreateLogGroup"
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
-            Resource:
-              - !Join [':', [!Join ['/', [!Join [':', ['arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/codebuild']], !FindInMap [Helpers, <%= @tag %>, BuildProjectName]]], 'log-stream', '*']]
+            Resource: !Sub
+              - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Project: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
             Effect: "Allow"
           - Action:
               - "s3:PutObject"
@@ -37,7 +40,11 @@
               - "s3:GetObject"
               - "s3:GetObjectVersion"
             Resource:
-              - Ref: AppBucket<%= @id %>
+              - !Sub
+                - '${Bucket}/*'
+                - Bucket: !GetAtt
+                  - AppBucket<%= @id %>
+                  - Arn
               - !Join [':::', ['arn:aws:s3', !Join ['/', [!Ref 'StagingBucketName', '*']]]]
             Effect: "Allow"
           - Action:
@@ -47,22 +54,28 @@
               - "codecommit:GetCommit"
               - "codecommit:GetUploadArchiveStatus"
               - "codecommit:UploadArchive"
-            Resource:
-              - !Join [':', [!Join [':', ['arn:aws:codecommit', !Ref 'AWS::Region', !Ref 'AWS::AccountId']], !Ref 'CodeCommitProject']]
+            Resource: !Sub
+              - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Project:  !Ref 'CodeCommitProject'
             Effect: "Allow"
           - Action:
               - "kms:GenerateDataKey*"
               - "kms:Encrypt"
               - "kms:Decrypt"
-            Resource:
-              - !Join [':', ["arn:aws:kms", !Ref 'AWS::Region', !Ref 'AWS::AccountId', "alias/aws/s3"]]
+            Resource: !Sub
+              - 'arn:aws:kms:${Region}:${Account}:alias/aws/s3'
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
             Effect: "Allow"
           - Action:
               - "codebuild:StartBuild"
               - "codebuild:BatchGetBuilds"
               - "codebuild:StopBuild"
-            Resource:
-              - Ref: <%= "#{@codebuildId}#{@id}" %>
+            Resource: !GetAtt
+              - <%= "#{@codebuildId}#{@id}" %>
+              - Arn
             Effect: "Allow"
   PipelineDeployRole<%= @id %>:
     Type: "AWS::IAM::Role"
@@ -79,6 +92,8 @@
             Action: "sts:AssumeRole"
   PipelineDeployPolicy<%= @id %>:
     Type: "AWS::IAM::Policy"
+    DependsOn:
+      - <%= "#{@pipelineId}#{@id}" %>
     Properties:
       PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>', 'deploy']]
       Roles:
@@ -94,6 +109,9 @@
               - "codepipeline:PutJobSuccessResult"
               - "codepipeline:PutJobFailureResult"
               - "codepipeline:RetryStageExecution"
-            Resource:
-              - Ref: <%= "#{@pipelineId}#{@id}" %>
+            Resource: !Sub
+              - arn:aws:codepipeline:${Region}:${Account}:${Pipeline}
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Pipeline: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
             Effect: "Allow"

@@ -2,10 +2,9 @@
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
       Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
-      RoleArn: !Sub
-             - arn:aws:iam::${Account}:role/${RoleName}
-             - Account: !Ref 'AWS::AccountId'
-               RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>']]
+      RoleArn: !GetAtt
+        - PipelineRole<%= @id %>
+        - Arn
       ArtifactStore:
         Location:
           Ref: 'StagingBucket'

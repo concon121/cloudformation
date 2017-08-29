@@ -1,7 +1,7 @@
-ProjectName=CBCF
+ProjectName=cbcf
 CodeCommitProject=cb-test
 StagingBucketName=cbcf-staging
 RootDomainZoneID=Z3P3H2NORORNMS
-RootDomain=spacegoats.co.uk
+RootDomain=cbcf
 IndexDocument=index.html
 WebsiteRootDirectory=public

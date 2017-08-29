@@ -2,8 +2,10 @@
 
   S3UploadBuild<%= @id %>:
     Type: "AWS::CodeBuild::Project"
+    DependsOn:
+      - AppBucket<%= @id %>
     Properties:
-      Name: !FindInMap [Helpers, <%= @tag %>, BuildProjectName]
+      Name: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"
@@ -14,7 +16,7 @@
         ComputeType: "small"
         EnvironmentVariables:
           - Name: "S3_BUCKET"
-            Value: !FindInMap [Helpers, <%= @tag %>, AppBucketName]
+            Value: !Join ['.', [<%= @tag %>, !Ref 'RootDomain']]
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
       Artifacts:
