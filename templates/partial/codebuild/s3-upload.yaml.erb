@@ -1,10 +1,9 @@
-<%= partial('s3/www-bucket.yaml.erb', id: @id, tag: @tag) %>
+<%= partial('s3/www-bucket.yaml.erb', tag: @tag) %>
 
-  S3UploadBuild<%= @id %>:
+  S3UploadBuild:
     Type: "AWS::CodeBuild::Project"
-    Condition: 'CreateSubDomains'
     DependsOn:
-      - AppBucket<%= @id %>
+      - AppBucket
     Properties:
       Name: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
       Description: "Upload resources to an S3 bucket"
@@ -19,17 +18,25 @@
         Image: "aws/codebuild/ubuntu-base:14.04"
         ComputeType: "small"
         EnvironmentVariables:
-          - Name: "S3_BUCKET"
-            Value: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
+          - !If
+            - 'CreateSubDomains'
+            - Name: "S3_BUCKET"
+              Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
+            - Name: "S3_BUCKET"
+              Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
-          - Name: "CLOUDFRONT_DIST_ID"
-            Value:
-              Ref: WebsiteCloudfront<%= @id %>
+          - !If
+            - 'CreateSubDomains'
+            - Name: "CLOUDFRONT_DIST_ID"
+              Value:
+                Ref: WebsiteCloudfront
+            - Name: "CLOUDFRONT_DIST_ID"
+              Value: 'N/A'
       Artifacts:
         Type: "CODEPIPELINE"
       ServiceRole:
-        Ref: PipelineRole<%= @id %>
+        Ref: PipelineRole
       TimeoutInMinutes: 60
       EncryptionKey: !Join [':', ['arn:aws:kms', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'alias/aws/s3']]
       Tags: []

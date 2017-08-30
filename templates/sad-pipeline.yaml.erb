@@ -29,6 +29,13 @@ Parameters:
   AllowedIPRange:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
+  AutoTrigger:
+    Description: Should the pipeline poll for changes and automatically trigger?
+    Type: String
+    Default: 'false'
+  WorkingBranch:
+    Description: The code branch to checkout and deploy
+    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -53,15 +60,15 @@ Resources:
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-<%= partial('iam/pipeline-iam.yaml.erb', id: environment['id'], tag: environment['tag'], pipelineId: 'S3StaticWebsitePipeline', codebuildId: 'S3UploadBuild') %>
+<%= partial('iam/pipeline-iam.yaml.erb', tag: environment['tag'], pipelineId: 'S3StaticWebsitePipeline', codebuildId: 'S3UploadBuild') %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= environment['tag'] %> pipeline
   # ---------------------------------------------------------------------------
-<%= partial('codebuild/s3-upload.yaml.erb', id: environment['id'], tag: environment['tag']) %>
+<%= partial('codebuild/s3-upload.yaml.erb', tag: environment['tag']) %>
   # ---------------------------------------------------------------------------
   # Pipeline definition: <%= environment['tag'] %>
   # ---------------------------------------------------------------------------
   <% pipeline=environment['pipeline'] %>
-<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', id: environment['id'], tag: environment['tag'], branch: pipeline['branch'], isManual: pipeline['isManual'], buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{environment['tag']}]]") %>
+<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', tag: environment['tag'], buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{environment['tag']}]]") %>
 
 <% end %>
