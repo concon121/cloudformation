@@ -1,3 +1,4 @@
+<%= partial('iam/pipeline-deploy-role.yaml.erb', tag: @tag) %>
 <%= partial('s3/default-bucket.yaml.erb', id: 'PipelineStagingBucket', name: '!Ref \'StagingBucketName\'') %>
 
   S3StaticWebsitePipeline:

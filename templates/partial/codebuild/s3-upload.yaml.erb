@@ -1,7 +1,7 @@
   <%= @logicalId %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
+      Name: !Join ['-', [!Ref 'ProjectName', '<%= @action %>', '<%= @tag %>']]
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"

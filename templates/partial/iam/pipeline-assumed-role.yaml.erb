@@ -24,32 +24,34 @@
         - Ref: PipelineRole
       PolicyDocument:
         Statement:
+          <% if @codebuilds %>
           - Action:
               - "logs:CreateLogGroup"
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
-            Resource:
-              <% @codebuilds.each do |codebuild| -%>
+            Resource: <% @codebuilds.each do |codebuild| %>
               - !Sub
                 - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
                 - Region: !Ref 'AWS::Region'
                   Account: !Ref 'AWS::AccountId'
-                  Project: <%= codebuild %>
-              <% end -%>
+                  Project: <%= codebuild %> <% end %>
             Effect: "Allow"
+          <% end %>
+          <% if @s3s %>
           - Action:
               - "s3:PutObject"
               - "s3:PutObjectAcl"
               - "s3:GetObject"
               - "s3:GetObjectVersion"
-            Resource:
+            Resource:<% @s3s.each do |s3| %>
               - !Sub
                 - '${Bucket}/*'
                 - Bucket: !GetAtt
-                  - AppBucket
-                  - Arn
-              - !Join [':::', ['arn:aws:s3', !Join ['/', [!Ref 'StagingBucketName', '*']]]]
+                  - <%= s3 %>
+                  - Arn <% end %>
             Effect: "Allow"
+          <% end %>
+          <% if @codecommits && !@codecommits.nil? %>
           - Action:
               - "codecommit:GitPull"
               - "codecommit:CancelUploadArchive"
@@ -57,12 +59,14 @@
               - "codecommit:GetCommit"
               - "codecommit:GetUploadArchiveStatus"
               - "codecommit:UploadArchive"
-            Resource: !Sub
-              - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-                Project:  !Ref 'CodeCommitProject'
+            Resource: <% @codecommits.each do |codecommit| %>
+              - !Sub
+                - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
+                - Region: !Ref 'AWS::Region'
+                  Account: !Ref 'AWS::AccountId'
+                  Project:  <%= codecommit %> <% end %>
             Effect: "Allow"
+          <% end %>
           - Action:
               - "kms:GenerateDataKey*"
               - "kms:Encrypt"
@@ -72,59 +76,21 @@
               - Region: !Ref 'AWS::Region'
                 Account: !Ref 'AWS::AccountId'
             Effect: "Allow"
+          <% if @codebuilds %>
           - Action:
               - "codebuild:StartBuild"
               - "codebuild:BatchGetBuilds"
               - "codebuild:StopBuild"
-            Resource: <% @codebuilds.each do |codebuild| -%>
+            Resource: <% @codebuilds.each do |codebuild| %>
             - !Sub
-              - arn:aws:codebuild:${Region}:${Account}:${Project}
+              - arn:aws:codebuild:${Region}:${Account}:project/${Project}
               - Region: !Ref 'AWS::Region'
                 Account: !Ref 'AWS::AccountId'
-                Project: <%= codebuild %>
-            <% end -%>
+                Project: <%= codebuild %> <% end %>
             Effect: "Allow"
+          <% end %>
           - Action:
               - "cloudfront:CreateInvalidation"
             Resource:
               - '*'
             Effect: 'Allow'
-
-  PipelineDeployRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      Path: "/"
-      RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>', 'deploy']]
-      AssumeRolePolicyDocument:
-        Version: "2008-10-17"
-        Statement:
-          - Sid: "1"
-            Effect: "Allow"
-            Principal:
-              Service: "codepipeline.amazonaws.com"
-            Action: "sts:AssumeRole"
-  PipelineDeployPolicy:
-    Type: "AWS::IAM::Policy"
-    DependsOn:
-      - <%= "#{@pipelineId}" %>
-    Properties:
-      PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>', 'deploy']]
-      Roles:
-        - Ref: PipelineDeployRole
-      PolicyDocument:
-        Statement:
-          - Action:
-              - "codepipeline:GetPipeline"
-              - "codepipeline:GetJobDetails"
-              - "codepipeline:GetPipelineState"
-              - "codepipeline:ListPipelines"
-              - "codepipeline:StartPipelineExecution"
-              - "codepipeline:PutJobSuccessResult"
-              - "codepipeline:PutJobFailureResult"
-              - "codepipeline:RetryStageExecution"
-            Resource: !Sub
-              - arn:aws:codepipeline:${Region}:${Account}:${Pipeline}
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-                Pipeline: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
-            Effect: "Allow"

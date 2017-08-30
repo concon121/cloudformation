@@ -1,0 +1,38 @@
+  PipelineDeployRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>', 'deploy']]
+      AssumeRolePolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+          - Sid: "1"
+            Effect: "Allow"
+            Principal:
+              Service: "codepipeline.amazonaws.com"
+            Action: "sts:AssumeRole"
+  PipelineDeployPolicy:
+    Type: "AWS::IAM::Policy"
+    DependsOn:
+      - <%= "#{@pipelineId}" %>
+    Properties:
+      PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>', 'deploy']]
+      Roles:
+        - Ref: PipelineDeployRole
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "codepipeline:GetPipeline"
+              - "codepipeline:GetJobDetails"
+              - "codepipeline:GetPipelineState"
+              - "codepipeline:ListPipelines"
+              - "codepipeline:StartPipelineExecution"
+              - "codepipeline:PutJobSuccessResult"
+              - "codepipeline:PutJobFailureResult"
+              - "codepipeline:RetryStageExecution"
+            Resource: !Sub
+              - arn:aws:codepipeline:${Region}:${Account}:${Pipeline}
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Pipeline: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
+            Effect: "Allow"

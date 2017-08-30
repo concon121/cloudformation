@@ -54,17 +54,53 @@ Resources:
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
-<%= partial('iam/pipeline-iam.yaml.erb', tag: @environment, pipelineId: 'S3StaticWebsitePipeline', codebuilds: ["!Join ['-', [!Ref 'ProjectName', 'Build', '<%= @environment %>']]", "!Join ['-', [!Ref 'ProjectName', 'Build', 'prod']]"], codebuildId: 'ApplicationUploadBuild') %>
+<% if @pipeline['testing'] %>
+  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]",
+                       "!Join [\'-\', [!Ref \'ProjectName\', \'Stage\', \'prod\']]"] %>
+  <% s3Arry = ['AppBucket', 'PipelineStagingBucket', 'ProdStagingBucket'] %>
+<% else %>
+  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Build\', \'#{@environment}\']]"] %>
+  <% s3Arry = ['AppBucket', 'PipelineStagingBucket'] %>
+<% end %>
+
+<% if @pipeline['enabled'] %>
+  <% codecommits = ["!Ref \'CodeCommitProject\'"] %>
+<% end %>
+
+<%= partial('iam/pipeline-assumed-role.yaml.erb',
+            tag: @environment,
+            pipelineId: 'S3StaticWebsitePipeline',
+            codebuilds: codebuildsArry,
+            s3s: s3Arry,
+            codecommits: codecommits) %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
 <%= partial('s3/www-bucket.yaml.erb', tag: @tag) %>
-<%= partial('codebuild/s3-upload.yaml.erb', tag: @environment, buildSpec: 'codebuild/buildspecs/static-website.yaml.erb', environmentVars: 'codebuild/environmentVars/static-website.yaml.erb', logicalId: 'ApplicationUploadBuild') %>
+<%= partial('codebuild/s3-upload.yaml.erb',
+            tag: @environment,
+            action: 'Deploy',
+            buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
+            logicalId: 'ApplicationUploadBuild') %>
 <% if @pipeline['testing'] %>
-<%= partial('s3/versioned-bucket.yaml.erb', id: 'ProdStagingBucket', name: '!Ref \'ProdStagingBucketName\'') %>
-<%= partial('codebuild/s3-upload.yaml.erb', tag: 'prod', buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb', environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb', s3Bucket: '!Ref \'ProdStagingBucketName\'', logicalId: 'ProdStagingUploadBuild') %>
+<%= partial('s3/versioned-bucket.yaml.erb',
+            id: 'ProdStagingBucket',
+            name: '!Ref \'ProdStagingBucketName\'') %>
+<%= partial('codebuild/s3-upload.yaml.erb',
+            tag: 'prod',
+            action: 'Stage',
+            buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb',
+            s3Bucket: '!Ref \'ProdStagingBucketName\'',
+            logicalId: 'ProdStagingUploadBuild') %>
 <% end %>
   # ---------------------------------------------------------------------------
   # Pipeline definition: <%= @environment %>
   # ---------------------------------------------------------------------------
-<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', tag: @environment, buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{@environment}]]", testing: @pipeline['testing']) %>
+<% if @pipeline['enabled'] %>
+<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb',
+            tag: @environment,
+            buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{@environment}]]",
+            testing: @pipeline['testing']) %>
+<% end %>

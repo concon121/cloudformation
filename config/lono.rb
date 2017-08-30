@@ -3,7 +3,8 @@ template 'development-sad-pipeline.yaml' do
   variables(
     'environment' => 'dev',
     'pipeline' => {
-      'testing' => 'false'
+      'enabled' => true,
+      'testing' => false
     }
   )
 end
@@ -13,7 +14,8 @@ template 'test-sad-pipeline.yaml' do
   variables(
     'environment' => 'test',
     'pipeline' => {
-      'testing' => 'true'
+      'enabled' => true,
+      'testing' => true
     }
   )
 end
@@ -23,7 +25,8 @@ template 'production-sad-pipeline.yaml' do
   variables(
     'environment' => 'prod',
     'pipeline' => {
-      'testing' => 'false'
+      'enabled' => false,
+      'testing' => false
     }
   )
 end
