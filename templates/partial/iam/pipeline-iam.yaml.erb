@@ -1,4 +1,4 @@
-  PipelineRole<%= @id %>:
+  PipelineRole:
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
@@ -16,12 +16,12 @@
             Principal:
               Service: "codebuild.amazonaws.com"
             Action: "sts:AssumeRole"
-  PipelinePolicy<%= @id %>:
+  PipelinePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>']]
       Roles:
-        - Ref: PipelineRole<%= @id %>
+        - Ref: PipelineRole
       PolicyDocument:
         Statement:
           - Action:
@@ -43,7 +43,7 @@
               - !Sub
                 - '${Bucket}/*'
                 - Bucket: !GetAtt
-                  - AppBucket<%= @id %>
+                  - AppBucket
                   - Arn
               - !Join [':::', ['arn:aws:s3', !Join ['/', [!Ref 'StagingBucketName', '*']]]]
             Effect: "Allow"
@@ -74,10 +74,16 @@
               - "codebuild:BatchGetBuilds"
               - "codebuild:StopBuild"
             Resource: !GetAtt
-              - <%= "#{@codebuildId}#{@id}" %>
+              - <%= "#{@codebuildId}" %>
               - Arn
             Effect: "Allow"
-  PipelineDeployRole<%= @id %>:
+          - Action:
+              - "cloudfront:CreateInvalidation"
+            Resource:
+              - '*'
+            Effect: 'Allow'
+
+  PipelineDeployRole:
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
@@ -90,14 +96,14 @@
             Principal:
               Service: "codepipeline.amazonaws.com"
             Action: "sts:AssumeRole"
-  PipelineDeployPolicy<%= @id %>:
+  PipelineDeployPolicy:
     Type: "AWS::IAM::Policy"
     DependsOn:
-      - <%= "#{@pipelineId}#{@id}" %>
+      - <%= "#{@pipelineId}" %>
     Properties:
       PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>', 'deploy']]
       Roles:
-        - Ref: PipelineDeployRole<%= @id %>
+        - Ref: PipelineDeployRole
       PolicyDocument:
         Statement:
           - Action:

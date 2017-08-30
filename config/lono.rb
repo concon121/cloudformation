@@ -4,26 +4,37 @@ s3 = [{
 }]
 
 dev = {
-  'id' => 'Development',
-  'tag' => 'dev',
-  'pipeline' => {
-    'branch' => 'develop'
-  }
+  'tag' => 'dev'
 }
 
-# prod = {
-#  'id' => 'Production',
-#  'tag' => 'prod',
-#  'pipeline' => {
-#    'branch' => 'master',
-#    'isManual' => true
-#  }
-# }
+tester = {
+  'tag' => 'test'
+}
 
-template 'cloud.yaml' do
-  source 'cloud.yaml.erb'
+prod = {
+  'tag' => 'prod'
+}
+
+template 'development-sad-pipeline.yaml' do
+  source 'sad-pipeline.yaml.erb'
   variables(
     'buckets' => s3,
     'environments' => [dev]
+  )
+end
+
+template 'test-sad-pipeline.yaml' do
+  source 'sad-pipeline.yaml.erb'
+  variables(
+    'buckets' => s3,
+    'environments' => [tester]
+  )
+end
+
+template 'production-sad-pipeline.yaml' do
+  source 'sad-pipeline.yaml.erb'
+  variables(
+    'buckets' => s3,
+    'environments' => [prod]
   )
 end

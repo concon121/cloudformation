@@ -1,0 +1,10 @@
+ProjectName=cbcf
+CodeCommitProject=cb-test
+StagingBucketName=cbcf-staging-dev
+RootDomainZoneID=Z3P3H2NORORNMS
+RootDomain=spacegoats.co.uk
+IndexDocument=index.html
+WebsiteRootDirectory=public
+AllowedIPRange=0:0:0:0/0
+AutoTrigger=true
+WorkingBranch=develop

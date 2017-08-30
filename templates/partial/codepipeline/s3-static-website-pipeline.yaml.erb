@@ -1,14 +1,17 @@
-  S3StaticWebsitePipeline<%= @id %>:
+  S3StaticWebsitePipeline:
     Type: "AWS::CodePipeline::Pipeline"
+    DependsOn:
+      - PipelineRole
+      - PipelinePolicy
     Properties:
       Name: !Join ['-', [!Ref 'ProjectName', 'Pipeline', '<%= @tag %>']]
       RoleArn: !GetAtt
-        - PipelineRole<%= @id %>
+        - PipelineRole
         - Arn
       ArtifactStore:
         Location:
           Ref: 'StagingBucket'
         Type: "S3"
       Stages:
-<%= partial('codepipeline/stages/codecommit.yaml.erb', branch: @branch, isManual: @isManual) %>
-<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', buildName: "S3UploadBuild#{@id}") %>
+<%= partial('codepipeline/stages/codecommit.yaml.erb') %>
+<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', buildName: "S3UploadBuild") %>
