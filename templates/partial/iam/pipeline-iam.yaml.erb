@@ -77,6 +77,12 @@
               - <%= "#{@codebuildId}#{@id}" %>
               - Arn
             Effect: "Allow"
+          - Action:
+              - "cloudfront:CreateInvalidation"
+            Resource:
+              - '*'
+            Effect: 'Allow'
+
   PipelineDeployRole<%= @id %>:
     Type: "AWS::IAM::Role"
     Properties:

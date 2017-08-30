@@ -26,6 +26,9 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
+  AllowedIPRange:
+    Description: IP addresses allowed to access the static website, in CIDR notation.
+    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
