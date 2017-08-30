@@ -43,6 +43,7 @@
     Condition: 'CreateSubDomains'
     DependsOn:
     - AppBucket
+    - DefaultZone
     Properties:
       DistributionConfig:
         Comment: Cloudfront Distribution pointing to S3 bucket

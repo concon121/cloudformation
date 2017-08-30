@@ -36,7 +36,7 @@ Assuming your template file and parameter files have the same name, the script r
 
 ## Architecture
 
-![dev only](images/cloud-dev-prod.png)
+![dev only](images/production-sad-pipeline.png)
 
 ## Workflow
 
