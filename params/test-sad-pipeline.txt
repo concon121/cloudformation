@@ -8,3 +8,4 @@ WebsiteRootDirectory=public
 AllowedIPRange=0:0:0:0/0
 AutoTrigger=false
 WorkingBranch=develop
+ProdStagingBucketName=cbcf-staging-prod

@@ -36,7 +36,11 @@ Parameters:
   WorkingBranch:
     Description: The code branch to checkout and deploy
     Type: String
-
+<% if @pipeline['testing'] %>
+  ProdStagingBucketName:
+    Description: The staging bucket which production deployments will pull from
+    Type: String
+<% end %>
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
 
@@ -44,31 +48,23 @@ Conditions:
 <%= partial('conditions/s3-static-website-conditions.yaml.erb', {}) %>
 
 Resources:
-
 # =============================================================================
-# S3 Buckets
+# Environment: <%= @environment %>
 # =============================================================================
-<% @buckets.each do |bucket| %>
-<%= partial('s3/default-bucket.yaml.erb', id: bucket['logicalId'], name: bucket['name']) %>
+  # ---------------------------------------------------------------------------
+  # IAM Security Role for the <%= @environment %> pipeline
+  # ---------------------------------------------------------------------------
+<%= partial('iam/pipeline-iam.yaml.erb', tag: @environment, pipelineId: 'S3StaticWebsitePipeline', codebuilds: ["!Join ['-', [!Ref 'ProjectName', 'Build', '<%= @environment %>']]", "!Join ['-', [!Ref 'ProjectName', 'Build', 'prod']]"], codebuildId: 'ApplicationUploadBuild') %>
+  # ---------------------------------------------------------------------------
+  # CodeBuild configuration for the <%= @environment %> pipeline
+  # ---------------------------------------------------------------------------
+<%= partial('s3/www-bucket.yaml.erb', tag: @tag) %>
+<%= partial('codebuild/s3-upload.yaml.erb', tag: @environment, buildSpec: 'codebuild/buildspecs/static-website.yaml.erb', environmentVars: 'codebuild/environmentVars/static-website.yaml.erb', logicalId: 'ApplicationUploadBuild') %>
+<% if @pipeline['testing'] %>
+<%= partial('s3/versioned-bucket.yaml.erb', id: 'ProdStagingBucket', name: '!Ref \'ProdStagingBucketName\'') %>
+<%= partial('codebuild/s3-upload.yaml.erb', tag: 'prod', buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb', environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb', s3Bucket: '!Ref \'ProdStagingBucketName\'', logicalId: 'ProdStagingUploadBuild') %>
 <% end %>
-
-<% @environments.each do |environment| %>
-
-# =============================================================================
-# Environment: <%= environment['tag'] %>
-# =============================================================================
   # ---------------------------------------------------------------------------
-  # IAM Security Role for the <%= environment['tag'] %> pipeline
+  # Pipeline definition: <%= @environment %>
   # ---------------------------------------------------------------------------
-<%= partial('iam/pipeline-iam.yaml.erb', tag: environment['tag'], pipelineId: 'S3StaticWebsitePipeline', codebuildId: 'S3UploadBuild') %>
-  # ---------------------------------------------------------------------------
-  # CodeBuild configuration for the <%= environment['tag'] %> pipeline
-  # ---------------------------------------------------------------------------
-<%= partial('codebuild/s3-upload.yaml.erb', tag: environment['tag']) %>
-  # ---------------------------------------------------------------------------
-  # Pipeline definition: <%= environment['tag'] %>
-  # ---------------------------------------------------------------------------
-  <% pipeline=environment['pipeline'] %>
-<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', tag: environment['tag'], buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{environment['tag']}]]") %>
-
-<% end %>
+<%= partial('codepipeline/s3-static-website-pipeline.yaml.erb', tag: @environment, buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{@environment}]]", testing: @pipeline['testing']) %>

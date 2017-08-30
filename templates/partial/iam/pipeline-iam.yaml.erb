@@ -28,11 +28,14 @@
               - "logs:CreateLogGroup"
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
-            Resource: !Sub
-              - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-                Project: !Join ['-', [!Ref 'ProjectName', 'Build', '<%= @tag %>']]
+            Resource:
+              <% @codebuilds.each do |codebuild| -%>
+              - !Sub
+                - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
+                - Region: !Ref 'AWS::Region'
+                  Account: !Ref 'AWS::AccountId'
+                  Project: <%= codebuild %>
+              <% end -%>
             Effect: "Allow"
           - Action:
               - "s3:PutObject"
@@ -73,9 +76,13 @@
               - "codebuild:StartBuild"
               - "codebuild:BatchGetBuilds"
               - "codebuild:StopBuild"
-            Resource: !GetAtt
-              - <%= "#{@codebuildId}" %>
-              - Arn
+            Resource: <% @codebuilds.each do |codebuild| -%>
+            - !Sub
+              - arn:aws:codebuild:${Region}:${Account}:${Project}
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Project: <%= codebuild %>
+            <% end -%>
             Effect: "Allow"
           - Action:
               - "cloudfront:CreateInvalidation"

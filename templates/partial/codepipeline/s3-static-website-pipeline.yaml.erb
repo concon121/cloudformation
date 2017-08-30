@@ -1,3 +1,5 @@
+<%= partial('s3/default-bucket.yaml.erb', id: 'PipelineStagingBucket', name: '!Ref \'StagingBucketName\'') %>
+
   S3StaticWebsitePipeline:
     Type: "AWS::CodePipeline::Pipeline"
     DependsOn:
@@ -10,8 +12,12 @@
         - Arn
       ArtifactStore:
         Location:
-          Ref: 'StagingBucket'
+          Ref: 'PipelineStagingBucket'
         Type: "S3"
       Stages:
 <%= partial('codepipeline/stages/codecommit.yaml.erb') %>
-<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', buildName: "S3UploadBuild") %>
+<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', stageName: 'AppDeploy', buildName: "ApplicationUploadBuild") %>
+<% if @testing %>
+<%= partial('codepipeline/stages/manual-approval.yaml.erb', stageName: 'Testing', actionName: 'Approval') %>
+<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb', stageName: 'ProdStaging', buildName: 'ProdStagingUploadBuild') %>
+<% end %>

@@ -1,40 +1,29 @@
-s3 = [{
-  'logicalId' => 'StagingBucket',
-  'name' => '!Ref \'StagingBucketName\''
-}]
-
-dev = {
-  'tag' => 'dev'
-}
-
-tester = {
-  'tag' => 'test'
-}
-
-prod = {
-  'tag' => 'prod'
-}
-
 template 'development-sad-pipeline.yaml' do
   source 'sad-pipeline.yaml.erb'
   variables(
-    'buckets' => s3,
-    'environments' => [dev]
+    'environment' => 'dev',
+    'pipeline' => {
+      'testing' => 'false'
+    }
   )
 end
 
 template 'test-sad-pipeline.yaml' do
   source 'sad-pipeline.yaml.erb'
   variables(
-    'buckets' => s3,
-    'environments' => [tester]
+    'environment' => 'test',
+    'pipeline' => {
+      'testing' => 'true'
+    }
   )
 end
 
 template 'production-sad-pipeline.yaml' do
   source 'sad-pipeline.yaml.erb'
   variables(
-    'buckets' => s3,
-    'environments' => [prod]
+    'environment' => 'prod',
+    'pipeline' => {
+      'testing' => 'false'
+    }
   )
 end
