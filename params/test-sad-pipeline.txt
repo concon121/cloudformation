@@ -7,5 +7,5 @@ IndexDocument=index.html
 WebsiteRootDirectory=public
 AllowedIPRange=0:0:0:0/0
 AutoTrigger=false
-WorkingBranch=develop
+WorkingBranch=master
 ProdStagingBucketName=cbcf-staging-prod

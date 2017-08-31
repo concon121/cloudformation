@@ -57,10 +57,16 @@ Resources:
 <% if @pipeline['testing'] %>
   <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]",
                        "!Join [\'-\', [!Ref \'ProjectName\', \'Stage\', \'prod\']]"] %>
-  <% s3Arry = ['AppBucket', 'PipelineStagingBucket', 'ProdStagingBucket'] %>
+  <% s3Arry = {
+      'names' => ['!Ref \'StagingBucketName\'', '!Ref \'ProdStagingBucket\''],
+      'arns' => ['AppBucket']
+  } %>
 <% else %>
-  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Build\', \'#{@environment}\']]"] %>
-  <% s3Arry = ['AppBucket', 'PipelineStagingBucket'] %>
+  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]"] %>
+  <% s3Arry = {
+      'names' => ['!Ref \'StagingBucketName\''],
+      'arns' => ['AppBucket']
+    } %>
 <% end %>
 
 <% if @pipeline['enabled'] %>

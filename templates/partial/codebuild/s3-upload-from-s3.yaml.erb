@@ -1,0 +1,22 @@
+  <%= @logicalId %>:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Join ['-', [!Ref 'ProjectName', '<%= @action %>', '<%= @tag %>']]
+      Description: "Upload resources to an S3 bucket"
+      Source:
+        Type: "S3"
+        Location: !Ref 'StagingBucketName'
+<%= partial(@buildSpec) %>
+      Environment:
+        Type: "container"
+        Image: "aws/codebuild/ubuntu-base:14.04"
+        ComputeType: "small"
+        EnvironmentVariables:
+<%= partial(@environmentVars, s3Bucket: @s3Bucket) %>
+      Artifacts:
+        Type: "CODEPIPELINE"
+      ServiceRole:
+        Ref: PipelineRole
+      TimeoutInMinutes: 60
+      EncryptionKey: !Join [':', ['arn:aws:kms', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'alias/aws/s3']]
+      Tags: []
