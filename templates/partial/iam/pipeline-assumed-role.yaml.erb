@@ -1,4 +1,4 @@
-  PipelineRole:
+  <%= @roleId %>:
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
@@ -16,7 +16,8 @@
             Principal:
               Service: "codebuild.amazonaws.com"
             Action: "sts:AssumeRole"
-  PipelinePolicy:
+
+  <%= @roleId %>Policy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>']]
@@ -24,77 +25,8 @@
         - Ref: PipelineRole
       PolicyDocument:
         Statement:
-          <% if @codebuilds %>
-          - Action:
-              - "logs:CreateLogGroup"
-              - "logs:CreateLogStream"
-              - "logs:PutLogEvents"
-            Resource: <% @codebuilds.each do |codebuild| %>
-              - !Sub
-                - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
-                - Region: !Ref 'AWS::Region'
-                  Account: !Ref 'AWS::AccountId'
-                  Project: <%= codebuild %> <% end %>
-            Effect: "Allow"
-          <% end %>
-          <% if @s3s %>
-          - Action:
-              - "s3:PutObject"
-              - "s3:PutObjectAcl"
-              - "s3:GetObject"
-              - "s3:GetObjectVersion"
-            Resource:<% @s3s['names'].each do |s3| %>
-              - !Sub
-                - 'arn:aws:s3:::${Bucket}/*'
-                - Bucket: <%= s3 %> <% end %>
-            <% @s3s['arns'].each do |s3| %>
-              - !Sub
-                - '${Bucket}/*'
-                - Bucket: !GetAtt
-                  - <%= s3 %>
-                  - 'Arn' <% end %>
-            Effect: "Allow"
-          <% end %>
-          <% if @codecommits && !@codecommits.nil? %>
-          - Action:
-              - "codecommit:GitPull"
-              - "codecommit:CancelUploadArchive"
-              - "codecommit:GetBranch"
-              - "codecommit:GetCommit"
-              - "codecommit:GetUploadArchiveStatus"
-              - "codecommit:UploadArchive"
-            Resource: <% @codecommits.each do |codecommit| %>
-              - !Sub
-                - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
-                - Region: !Ref 'AWS::Region'
-                  Account: !Ref 'AWS::AccountId'
-                  Project:  <%= codecommit %> <% end %>
-            Effect: "Allow"
-          <% end %>
-          - Action:
-              - "kms:GenerateDataKey*"
-              - "kms:Encrypt"
-              - "kms:Decrypt"
-            Resource: !Sub
-              - 'arn:aws:kms:${Region}:${Account}:alias/aws/s3'
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-            Effect: "Allow"
-          <% if @codebuilds %>
-          - Action:
-              - "codebuild:StartBuild"
-              - "codebuild:BatchGetBuilds"
-              - "codebuild:StopBuild"
-            Resource: <% @codebuilds.each do |codebuild| %>
-            - !Sub
-              - arn:aws:codebuild:${Region}:${Account}:project/${Project}
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-                Project: <%= codebuild %> <% end %>
-            Effect: "Allow"
-          <% end %>
-          - Action:
-              - "cloudfront:CreateInvalidation"
-            Resource:
-              - '*'
-            Effect: 'Allow'
+<%= partial('iam/policies/actions/kms.yaml.erb', codecommits: @codecommits) %>
+<%= partial('iam/policies/actions/s3.yaml.erb', s3s: @s3s) %>
+<%= partial('iam/policies/actions/codecommit.yaml.erb', codecommits: @codecommits) %>
+<%= partial('iam/policies/actions/codebuild.yaml.erb', codebuilds: @codebuilds) %>
+<%= partial('iam/policies/actions/cloudfront-invalidate.yaml.erb') %>

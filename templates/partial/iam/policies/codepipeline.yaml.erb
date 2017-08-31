@@ -1,0 +1,10 @@
+  <%= @id %>:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: <%= @name %>
+      Roles:
+        - Ref: PipelineDeployRole
+      PolicyDocument:
+        Statement:
+<%= partial('iam/policies/actions/codepipeline.yaml.erb',
+            pipelines: ["!Join [\'-\', [!Ref \'ProjectName\', \'Pipeline\', \'@tag\']]"]) %>

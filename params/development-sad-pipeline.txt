@@ -8,3 +8,4 @@ WebsiteRootDirectory=public
 AllowedIPRange=0:0:0:0/0
 AutoTrigger=true
 WorkingBranch=develop
+UserRole=cb-codecommit-test

@@ -19,7 +19,7 @@
       PolicyDocument:
         Statement:
         - Sid: IPAllow
-          Effect: Allow
+          Effect: Deny
           Principal: '*'
           Action: s3:GetObject
           Resource: !Join ['', ['arn:aws:s3:::', !Ref 'AppBucket', /*]]

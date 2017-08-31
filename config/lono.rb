@@ -4,7 +4,8 @@ template 'development-sad-pipeline.yaml' do
     'environment' => 'dev',
     'pipeline' => {
       'enabled' => true,
-      'testing' => false
+      'testing' => false,
+      'codecommitPolicy' => true
     }
   )
 end
@@ -15,7 +16,8 @@ template 'test-sad-pipeline.yaml' do
     'environment' => 'test',
     'pipeline' => {
       'enabled' => true,
-      'testing' => true
+      'testing' => true,
+      'codecommitPolicy' => false
     }
   )
 end
@@ -26,7 +28,8 @@ template 'production-sad-pipeline.yaml' do
     'environment' => 'prod',
     'pipeline' => {
       'enabled' => false,
-      'testing' => false
+      'testing' => false,
+      'codecommitPolicy' => false
     }
   )
 end

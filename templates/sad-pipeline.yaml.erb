@@ -41,6 +41,12 @@ Parameters:
     Description: The staging bucket which production deployments will pull from
     Type: String
 <% end %>
+<% if @pipeline['codecommitPolicy'] %>
+  UserRole:
+    Description: The role that resource access policies will be applied to.
+    Type: String
+<% end %>
+
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
 
@@ -78,7 +84,8 @@ Resources:
             pipelineId: 'S3StaticWebsitePipeline',
             codebuilds: codebuildsArry,
             s3s: s3Arry,
-            codecommits: codecommits) %>
+            codecommits: codecommits,
+            roleId: 'PipelineRole') %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
@@ -110,3 +117,11 @@ Resources:
             buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{@environment}]]",
             testing: @pipeline['testing']) %>
 <% end %>
+
+  # ---------------------------------------------------------------------------
+  # Access Policies
+  # ---------------------------------------------------------------------------
+<%= partial('iam/policies/codecommit.yaml.erb',
+            id: 'CodeCommitAccessPolicy',
+            name: "!Join [\'-\', [!Ref CodeCommitProject, 'access', 'policy']]",
+            codecommits: ['!Ref CodeCommitProject']) %>

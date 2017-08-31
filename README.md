@@ -54,7 +54,7 @@ AWS CodeCommit | master  | When a release is ready to be deployed to production,
 ### Key
 
 - ${ABC123} - Input parameter
-- #{ABC123} - Hardcoded in the template, variable depending on which template.
+- # {ABC123} - Hardcoded in the template, variable depending on which template.
 
 ### Roles
 
@@ -83,4 +83,4 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 
 ## TODO
 
-- Investigate federated logins
+- Investigate federated logins, how to provide individual git access / permissions to deploy via single sign on.

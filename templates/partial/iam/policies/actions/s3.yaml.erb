@@ -1,0 +1,18 @@
+          <% if @s3s %>
+          - Action:
+              - "s3:PutObject"
+              - "s3:PutObjectAcl"
+              - "s3:GetObject"
+              - "s3:GetObjectVersion"
+            Resource:<% @s3s['names'].each do |s3| %>
+              - !Sub
+                - 'arn:aws:s3:::${Bucket}/*'
+                - Bucket: <%= s3 %> <% end %>
+            <% @s3s['arns'].each do |s3| %>
+              - !Sub
+                - '${Bucket}/*'
+                - Bucket: !GetAtt
+                  - <%= s3 %>
+                  - 'Arn' <% end %>
+            Effect: "Allow"
+          <% end %>

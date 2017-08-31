@@ -1,0 +1,9 @@
+  <%= @id %>:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: <%= @name %>
+      Roles:
+        - !Ref UserRole
+      PolicyDocument:
+        Statement:
+<%= partial('iam/policies/actions/codecommit.yaml.erb', codecommits: @codecommits) %>

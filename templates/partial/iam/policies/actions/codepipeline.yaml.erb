@@ -1,0 +1,18 @@
+<% if @pipelines %>
+          - Action:
+              - "codepipeline:GetPipeline"
+              - "codepipeline:GetJobDetails"
+              - "codepipeline:GetPipelineState"
+              - "codepipeline:ListPipelines"
+              - "codepipeline:StartPipelineExecution"
+              - "codepipeline:PutJobSuccessResult"
+              - "codepipeline:PutJobFailureResult"
+              - "codepipeline:RetryStageExecution"
+            Resource: <% @pipelines.each do |pipeline| %>
+              - !Sub
+                - arn:aws:codepipeline:${Region}:${Account}:${Pipeline}
+                - Region: !Ref 'AWS::Region'
+                  Account: !Ref 'AWS::AccountId'
+                  Pipeline: <%= pipeline %>
+            Effect: "Allow" <% end %>
+<% end %>

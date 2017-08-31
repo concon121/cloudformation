@@ -1,0 +1,26 @@
+<% if @codecommits && !@codecommits.nil? %>
+          - Action:
+              - "codecommit:BatchGetRepositories"
+              - "codecommit:Get*"
+              - "codecommit:List*"
+              - "codecommit:CreateRepository"
+              - "codecommit:CreateBranch"
+              - "codecommit:DeleteBranch"
+              - "codecommit:Put*"
+              - "codecommit:Test*"
+              - "codecommit:Update*"
+              - "codecommit:GitPull"
+              - "codecommit:GitPush"
+              - "codecommit:CancelUploadArchive"
+              - "codecommit:GetBranch"
+              - "codecommit:GetCommit"
+              - "codecommit:GetUploadArchiveStatus"
+              - "codecommit:UploadArchive"
+            Resource: <% @codecommits.each do |codecommit| %>
+              - !Sub
+                - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
+                - Region: !Ref 'AWS::Region'
+                  Account: !Ref 'AWS::AccountId'
+                  Project:  <%= codecommit %> <% end %>
+            Effect: "Allow"
+<% end %>

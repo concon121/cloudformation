@@ -1,0 +1,28 @@
+<% if @codebuilds && !@codebuilds.nil? %>
+          - Action:
+              - "codebuild:BatchGetBuilds"
+              - "codebuild:BatchGetProjects"
+              - "codebuild:ListBuilds"
+              - "codebuild:ListBuildsForProject"
+              - "codebuild:ListProjects"
+              - "codebuild:StartBuild"
+              - "codebuild:StopBuild"
+            Resource: <% @codebuilds.each do |codebuild| %>
+            - !Sub
+              - arn:aws:codebuild:${Region}:${Account}:project/${Project}
+              - Region: !Ref 'AWS::Region'
+                Account: !Ref 'AWS::AccountId'
+                Project: <%= codebuild %> <% end %>
+            Effect: "Allow"
+          - Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: <% @codebuilds.each do |codebuild| %>
+              - !Sub
+                - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
+                - Region: !Ref 'AWS::Region'
+                  Account: !Ref 'AWS::AccountId'
+                  Project: <%= codebuild %> <% end %>
+            Effect: "Allow"
+<% end %>
