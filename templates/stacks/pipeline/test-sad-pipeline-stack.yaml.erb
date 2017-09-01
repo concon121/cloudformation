@@ -5,19 +5,6 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
-  CodeCommitProject:
-    Description: The name of the AWS Code Commit project to build
-    Type: String
-  StagingBucketName:
-    Description: The name of the staging s3 bucket for development
-    Type: String
-  RootDomainZoneID:
-    Description: The zone ID of the root domain
-    Type: String
-    Default: ''
-  RootDomain:
-    Description: The root domain
-    Type: String
   IndexDocument:
     Description: The index document for static S3 websites
     Type: String
@@ -29,99 +16,90 @@ Parameters:
   AllowedIPRange:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
-  AutoTrigger:
-    Description: Should the pipeline poll for changes and automatically trigger?
-    Type: String
-    Default: 'false'
-  WorkingBranch:
-    Description: The code branch to checkout and deploy
-    Type: String
-<% if @pipeline['testing'] %>
-  ProdStagingBucketName:
-    Description: The staging bucket which production deployments will pull from
-    Type: String
-<% end %>
-<% if @pipeline['codecommitPolicy'] %>
   UserRole:
     Description: The role that resource access policies will be applied to.
     Type: String
-<% end %>
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
 
-Conditions:
-<%= partial('conditions/s3-static-website-conditions.yaml.erb', {}) %>
-
 Resources:
-# =============================================================================
-# Environment: <%= @environment %>
-# =============================================================================
+
+  <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, test, !Ref \'AWS::AccountId\']]' %>
+  <% prodStagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
+
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
-<% if @pipeline['testing'] %>
-  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]",
-                       "!Join [\'-\', [!Ref \'ProjectName\', \'Stage\', \'prod\']]"] %>
+  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, deploy, test]]",
+                       "!Join [-, [!Ref ProjectName, stage, prod]]"] %>
   <% s3Arry = {
-      'names' => ['!Ref \'StagingBucketName\'', '!Ref \'ProdStagingBucket\''],
+      'names' => [stagingBucket, prodStagingBucket],
       'arns' => ['AppBucket']
   } %>
-<% else %>
-  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]"] %>
-  <% s3Arry = {
-      'names' => ['!Ref \'StagingBucketName\''],
-      'arns' => ['AppBucket']
-    } %>
-<% end %>
-
-<% if @pipeline['enabled'] %>
-  <% codecommits = ["!Ref \'CodeCommitProject\'"] %>
-<% end %>
+  <% codecommits = ["!Ref ProjectName"] %>
 
 <%= partial('iam/pipeline-assumed-role.yaml.erb',
-            tag: @environment,
+            tag: 'test',
             pipelineId: 'S3StaticWebsitePipeline',
             codebuilds: codebuildsArry,
             s3s: s3Arry,
             codecommits: codecommits,
             roleId: 'PipelineRole') %>
+
   # ---------------------------------------------------------------------------
-  # CodeBuild configuration for the <%= @environment %> pipeline
+  # S3 Static Website Bucket
   # ---------------------------------------------------------------------------
-<%= partial('s3/www-bucket.yaml.erb', tag: @tag) %>
+
+<%= partial('s3/www-bucket.yaml.erb',
+            id: 'AppBucket',
+            tag: 'test',
+            bucketName: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]') %>
+
+  # ---------------------------------------------------------------------------
+  # CodeBuild configuration
+  # ---------------------------------------------------------------------------
+
 <%= partial('codebuild/s3-upload.yaml.erb',
-            tag: @environment,
+            tag: 'test',
             action: 'Deploy',
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
             logicalId: 'ApplicationUploadBuild') %>
-<% if @pipeline['testing'] %>
+
+  # ---------------------------------------------------------------------------
+  # Production Staging
+  # ---------------------------------------------------------------------------
+
 <%= partial('s3/versioned-bucket.yaml.erb',
             id: 'ProdStagingBucket',
-            name: '!Ref \'ProdStagingBucketName\'') %>
+            name: '!Ref ProdStagingBucketName') %>
 <%= partial('codebuild/s3-upload.yaml.erb',
             tag: 'prod',
             action: 'Stage',
             buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb',
             environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb',
-            s3Bucket: '!Ref \'ProdStagingBucketName\'',
-            logicalId: 'ProdStagingUploadBuild') %>
-<% end %>
+            s3Bucket: '!Ref ProdStagingBucketName',
+            logicalId: 'ProdStagingUploadBuild',
+            cloudfront: false) %>
+
   # ---------------------------------------------------------------------------
-  # Pipeline definition: <%= @environment %>
+  # Pipeline definition
   # ---------------------------------------------------------------------------
-<% if @pipeline['enabled'] %>
+
 <%= partial('codepipeline/s3-static-website-pipeline.yaml.erb',
-            tag: @environment,
-            buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', #{@environment}]]",
-            testing: @pipeline['testing']) %>
-<% end %>
+            tag: 'test',
+            buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', 'test']]",
+            testing: true,
+            branch: 'master',
+            repo: '!Ref ProjectName',
+            autotrigger: false,
+            stagingBucket: stagingBucket) %>
 
   # ---------------------------------------------------------------------------
   # Access Policies
   # ---------------------------------------------------------------------------
 <%= partial('iam/policies/codecommit.yaml.erb',
             id: 'CodeCommitAccessPolicy',
-            name: "!Join [\'-\', [!Ref CodeCommitProject, 'access', 'policy']]",
-            codecommits: ['!Ref CodeCommitProject']) %>
+            name: "!Join [-, [!Ref ProjectName, 'access', 'policy']]",
+            codecommits: ['!Ref ProjectName']) %>

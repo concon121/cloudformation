@@ -3,7 +3,7 @@
             roleId: 'PipelineDeployRole') %>
 <%= partial('s3/default-bucket.yaml.erb',
             id: 'PipelineStagingBucket',
-            name: '!Ref \'StagingBucketName\'') %>
+            name: @stagingBucket) %>
 
   S3StaticWebsitePipeline:
     Type: "AWS::CodePipeline::Pipeline"
@@ -19,7 +19,10 @@
           Ref: 'PipelineStagingBucket'
         Type: "S3"
       Stages:
-<%= partial('codepipeline/stages/codecommit.yaml.erb') %>
+<%= partial('codepipeline/stages/codecommit.yaml.erb',
+            repo: @repo,
+            branch: @branch,
+            autotrigger: @autotrigger) %>
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
             stageName: 'AppDeploy',
             buildName: "ApplicationUploadBuild") %>

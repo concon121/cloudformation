@@ -1,0 +1,11 @@
+  <%= @id %>:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: <%= @url %>
+      Parameters: <% @params.each do |param| %>
+        - <%= param['key'] %>: <%= param['value'] %> <% end %>
+      <% if @tags %>
+      Tags: <% @tags.each do |tag| %>
+       - Key: <%= tag['key'] %>
+         Value: <%= tag['value'] %> <% end %>
+      <% end %>

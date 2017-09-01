@@ -1,0 +1,84 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  RootDomainZoneID:
+    Description: The zone ID of the root domain
+    Type: String
+    Default: ''
+  RootDomain:
+    Description: The root domain
+    Type: String
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+  WebsiteRootDirectory:
+    Description: The directory in code commit containing the index file
+    Type: String
+    Default: '.'
+  AllowedIPRange:
+    Description: IP addresses allowed to access the static website, in CIDR notation.
+    Type: String
+
+Mappings:
+<%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
+
+Resources:
+
+  <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
+
+  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]"] %>
+  <% s3Arry = {
+      'names' => ['!Ref \'StagingBucketName\''],
+      'arns' => ['AppBucket']
+    } %>
+
+  # ---------------------------------------------------------------------------
+  # IAM Security Role for the <%= @environment %> pipeline
+  # ---------------------------------------------------------------------------
+
+<%= partial('iam/pipeline-assumed-role.yaml.erb',
+            tag: 'prod',
+            pipelineId: 'S3StaticWebsitePipeline',
+            codebuilds: codebuildsArry,
+            s3s: s3Arry,
+            roleId: 'PipelineRole') %>
+
+  # ---------------------------------------------------------------------------
+  # S3 Static Website Bucket
+  # ---------------------------------------------------------------------------
+
+<%= partial('s3/www-bucket.yaml.erb',
+            id: 'AppBucket',
+            bucketName: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
+
+  # ---------------------------------------------------------------------------
+  # CloudFront Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('cloudfront/cloudfront.yaml.erb',
+            id: 'Production') %>
+
+  # ---------------------------------------------------------------------------
+  # CodeBuild configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('codebuild/s3-upload.yaml.erb',
+            tag: 'prod',
+            action: 'Deploy',
+            buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
+            logicalId: 'ApplicationUploadBuild',
+            cloudfront: true) %>
+
+  # ---------------------------------------------------------------------------
+  # Access Policies
+  # ---------------------------------------------------------------------------
+<%= partial('iam/policies/codecommit.yaml.erb',
+            id: 'CodeCommitAccessPolicy',
+            name: "!Join [\'-\', [!Ref ProjectName, 'access', 'policy']]",
+            codecommits: ['!Ref ProjectName']) %>

@@ -84,3 +84,9 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 ## TODO
 
 - Investigate federated logins, how to provide individual git access / permissions to deploy via single sign on.
+- Outputs
+- Tags
+- WAF
+- CodeCommit Repo
+- Naming Conventions
+- Restructure nested stacks for each calc

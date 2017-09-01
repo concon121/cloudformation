@@ -1,4 +1,5 @@
-        BuildSpec: !If
-          - 'CreateSubDomains'
+        BuildSpec: <% if @cloudfront && !@cloudfront.nil? %>
           - "version: 0.2\n\nphases:\n  build:\n    commands:\n      - sudo apt-get update -y\n      - sudo apt-get install libfile-mimeinfo-perl -y\n      - for file in `cd ${ROOT_DIRECTORY} && find * -type f`; do aws s3api put-object --key \"${file}\" --bucket $S3_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${ROOT_DIRECTORY}/${file}\" --content-type `/usr/bin/mimetype -b \"${ROOT_DIRECTORY}/${file}\"`; done\n      - aws configure set preview.cloudfront true\n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\""
+          <% else %>
           - "version: 0.2\n\nphases:\n  build:\n    commands:\n      - sudo apt-get update -y\n      - sudo apt-get install libfile-mimeinfo-perl -y\n      - for file in `cd ${ROOT_DIRECTORY} && find * -type f`; do aws s3api put-object --key \"${file}\" --bucket $S3_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${ROOT_DIRECTORY}/${file}\" --content-type `/usr/bin/mimetype -b \"${ROOT_DIRECTORY}/${file}\"`; done"
+          <% end %>

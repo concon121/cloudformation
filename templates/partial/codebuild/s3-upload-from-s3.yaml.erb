@@ -5,7 +5,7 @@
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "S3"
-        Location: !Ref 'StagingBucketName'
+        Location: @s3Bucket
 <%= partial(@buildSpec) %>
       Environment:
         Type: "container"

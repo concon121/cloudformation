@@ -5,7 +5,7 @@
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"
-<%= partial(@buildSpec) %>
+<%= partial(@buildSpec, cloudfront: @cloudfront) %>
       Environment:
         Type: "container"
         Image: "aws/codebuild/ubuntu-base:14.04"
