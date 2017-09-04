@@ -28,7 +28,7 @@ Resources:
             id: 'SharedResourcesZone',
             comment: '!Join [\' \' , [\'Root Domain for\', !Ref ProjectName]]',
             name: '!Join [., [!Ref SubDomain, !Ref RootDomain]]',
-            tags: [{'key' => 'Example', 'Value' => 'Tag'}]) %>
+            tags: [{'key' => 'Example', 'value' => 'Tag'}]) %>
 <%= partial('codecommit/repository.yaml.erb',
             id: 'SharedResourcesRepo',
             name: '!Ref ProjectName',

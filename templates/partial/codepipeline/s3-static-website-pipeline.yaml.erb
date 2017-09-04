@@ -1,9 +1,9 @@
-<%= partial('iam/pipeline-deploy-role.yaml.erb',
-            tag: @tag,
-            roleId: 'PipelineDeployRole') %>
 <%= partial('s3/default-bucket.yaml.erb',
             id: 'PipelineStagingBucket',
             name: @stagingBucket) %>
+
+<% appOutput = 'app-source' %>
+<% commonOutput = 'common-source' %>
 
   S3StaticWebsitePipeline:
     Type: "AWS::CodePipeline::Pipeline"
@@ -19,18 +19,31 @@
           Ref: 'PipelineStagingBucket'
         Type: "S3"
       Stages:
+        - Name: "Source"
+          Actions:
 <%= partial('codepipeline/stages/codecommit.yaml.erb',
+            name: 'ApplicationSource',
             repo: @repo,
             branch: @branch,
-            autotrigger: @autotrigger) %>
+            autotrigger: @autotrigger,
+            output: appOutput) %>
+<% if @commonRepo && !@commonRepo.nil? %>
+<%= partial('codepipeline/stages/codecommit.yaml.erb',
+            name: 'CommonSource',
+            repo: @commonRepo,
+            branch: @branch,
+            autotrigger: @autotrigger,
+            output: commonOutput) %>
+<% end %>
+        - Name: 'Deployment'
+          Actions:
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            stageName: 'AppDeploy',
-            buildName: "ApplicationUploadBuild") %>
-<% if @testing %>
-<%= partial('codepipeline/stages/manual-approval.yaml.erb',
-            stageName: 'Testing',
-            actionName: 'Approval') %>
+            name: 'DeployApp',
+            buildName: "ApplicationUploadBuild",
+            input: appOutput) %>
+<% if @commonRepo && !@commonRepo.nil? %>
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            stageName: 'ProdStaging',
-            buildName: 'ProdStagingUploadBuild') %>
+            name: 'DeployCommon',
+            buildName: "ApplicationUploadBuild",
+            input: commonOutput) %>
 <% end %>

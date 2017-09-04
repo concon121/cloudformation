@@ -11,7 +11,7 @@
         Image: "aws/codebuild/ubuntu-base:14.04"
         ComputeType: "small"
         EnvironmentVariables:
-<%= partial(@environmentVars, s3Bucket: @s3Bucket) %>
+<%= partial(@environmentVars, s3Bucket: @s3Bucket, cloudfront: @cloudfront, cloudfrontLogicalId: @cloudfrontLogicalId) %>
       Artifacts:
         Type: "CODEPIPELINE"
       ServiceRole:

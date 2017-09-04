@@ -9,34 +9,12 @@ Parameters:
   RootDomain:
     Description: The root domain
     Type: String
-  IndexDocument:
-    Description: The index document for static S3 websites
-    Type: String
-    Default: index.html
-  WebsiteRootDirectory:
-    Description: The directory in code commit containing the index file
-    Type: String
-    Default: '.'
-  AllowedIPRange:
+  IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
-  AutoTrigger:
-    Description: Should the pipeline poll for changes and automatically trigger?
-    Type: String
-    Default: 'false'
-  WorkingBranch:
-    Description: The code branch to checkout and deploy
-    Type: String
-<% if @pipeline['testing'] %>
-  ProdStagingBucketName:
-    Description: The staging bucket which production deployments will pull from
-    Type: String
-<% end %>
-<% if @pipeline['codecommitPolicy'] %>
   UserRole:
     Description: The role that resource access policies will be applied to.
     Type: String
-<% end %>
   NestedStackS3Bucket:
     Description: HTTP URL for the S3 bucket where the stacks are located
     Type: String
@@ -46,9 +24,6 @@ Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
 <%= partial('mappings/environment-configuration.yaml.erb') %>
 
-Conditions:
-<%= partial('conditions/s3-static-website-conditions.yaml.erb', {}) %>
-
 Resources:
   <% @stacks.each do |stack| %>
   <% key = stack['key'] %>
@@ -56,6 +31,9 @@ Resources:
             id: stack['id'],
             url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', #{key}]]",
             params: stack['params'],
-            tags: stack['tags']) %>
+            tags: stack['tags'],
+            devTags: stack['devTags'],
+            testTags: stack['testTags'],
+            prodTags: stack['prodTags']) %>
 
   <% end %>

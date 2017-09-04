@@ -1,15 +1,15 @@
-          - !If
-            - 'CreateSubDomains'
-            - Name: "S3_BUCKET"
-              Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-            - Name: "S3_BUCKET"
-              Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
+          - Name: "S3_BUCKET"
+          <% if @cloudfront && !@cloudfront.nil? %>
+            Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
+          <% else %>
+            Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
+          <% end %>
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
-          - !If
-            - 'CreateSubDomains'
-            - Name: "CLOUDFRONT_DIST_ID"
-              Value:
-                Ref: WebsiteCloudfront
-            - Name: "CLOUDFRONT_DIST_ID"
-              Value: 'N/A'
+          - Name: "CLOUDFRONT_DIST_ID"
+          <% if @cloudfront && !@cloudfront.nil? %>
+            Value:
+                Ref: <%= @cloudfrontLogicalId %>
+          <% else %>
+            Value: 'N/A'
+          <% end %>

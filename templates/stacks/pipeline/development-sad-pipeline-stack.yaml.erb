@@ -5,7 +5,7 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
-  AllowedIPRange:
+  IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
   UserRole:
@@ -19,6 +19,9 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
+  CommonRepo:
+    Description: The name of the gir repository containing the common code
+    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -28,12 +31,12 @@ Resources:
 
   <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, dev, !Ref \'AWS::AccountId\']]' %>
 
-  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, deploy, dev]]"] %>
+  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, Deploy, dev]]"] %>
   <% s3Arry = {
       'names' => [stagingBucket],
       'arns' => ['AppBucket']
     } %>
-  <% codecommits = ["!Ref ProjectName"] %>
+  <% codecommits = ["!Ref ProjectName", "!Ref CommonRepo"] %>
 
   # ---------------------------------------------------------------------------
   # IAM Security Role for the pipeline to assume
@@ -87,6 +90,7 @@ Resources:
             testing: false,
             branch: 'develop',
             repo: '!Ref ProjectName',
+            commonRepo: '!Ref CommonRepo',
             autotrigger: true,
             stagingBucket: stagingBucket) %>
 
@@ -96,5 +100,15 @@ Resources:
 
 <%= partial('iam/policies/codecommit.yaml.erb',
             id: 'CodeCommitAccessPolicy',
-            name: "!Join [-, [!Ref ProjectName, 'access', 'policy']]",
+            name: "!Join [-, [!Ref ProjectName, 'access', 'policy', 'dev']]",
             codecommits: ['!Ref ProjectName']) %>
+
+<%= partial('iam/policies/codebuild.yaml.erb',
+            id: 'CodeBuildAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', dev]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
+
+<%= partial('iam/policies/codepipeline.yaml.erb',
+            id: 'CodePipelineAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'access', 'policy', dev]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Pipeline, dev]]"]) %>

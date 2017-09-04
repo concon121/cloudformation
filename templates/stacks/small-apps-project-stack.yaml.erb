@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
-  AllowedIPRange:
+  IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
   ProjectName:
@@ -25,31 +25,35 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
+  NestedStackS3Bucket:
+    Description: HTTP URL for the S3 bucket where the stacks are located
+    Type: String
+    Default: 'https://s3-eu-west-1.amazonaws.com/general-s3-store'
+  CommonRepo:
+    Description: The name of the gir repository containing the common code
+    Type: String
+
+Mappings:
+<%= partial('mappings/environment-configuration.yaml.erb') %>
 
 Resources:
 <%= partial('cloudformation/stack.yaml.erb',
             id: "DevelopmentStack",
             url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/development-sad-pipeline.yaml\']]",
-            params: [{'key' => 'ProjectName', 'value': '!Ref ProjectName'},
-                     {'key' => 'AllowedIPRange', 'value' => '!Ref AllowedIPRange'},
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'IPWhiteList', 'value' => '!Ref IPWhiteList'},
                      {'key' => 'UserRole', 'value' => '!Ref UserRole'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
-                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'}]) %>
+                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
+                     {'key' => 'CommonRepo', 'value' => '!Ref CommonRepo'}],
+            tags: @devTags) %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: "TestStack",
             url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/test-sad-pipeline.yaml\']]",
-            params: [{'key' => 'ProjectName', 'value': '!Ref ProjectName'},
-                     {'key' => 'AllowedIPRange', 'value' => '!Ref AllowedIPRange'},
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'IPWhiteList', 'value' => '!Ref IPWhiteList'},
                      {'key' => 'UserRole', 'value' => '!Ref UserRole'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
-                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'}]) %>
-<%= partial('cloudformation/stack.yaml.erb',
-            id: "ProductionStack",
-            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/production-sad-pipeline.yaml\']]",
-            params: [{'key' => 'ProjectName', 'value': '!Ref ProjectName'},
-                     {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
-                     {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},
-                     {'key' => 'AllowedIPRange', 'value' => '!Ref AllowedIPRange'},
-                     {'key' => 'UserRole', 'value' => '!Ref UserRole'},
-                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
-                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'}]) %>
+                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
+                     {'key' => 'CommonRepo', 'value' => '!Ref CommonRepo'}],
+            tags: @testTags) %>

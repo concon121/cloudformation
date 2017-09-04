@@ -1,6 +1,4 @@
-        - Name: "Source"
-          Actions:
-            - Name: "ApplicationSource"
+            - Name: <%= @name %>
               ActionTypeId:
                 Category: "Source"
                 Owner: "AWS"
@@ -12,4 +10,4 @@
                 RepositoryName: <%= @repo %>
                 PollForSourceChanges: <%= @autotrigger %>
               OutputArtifacts:
-                - Name: "app-source"
+                - Name: <%= @output %>

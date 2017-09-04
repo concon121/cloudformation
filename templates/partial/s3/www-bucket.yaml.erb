@@ -3,10 +3,6 @@
     Properties:
       AccessControl: PublicReadWrite
       BucketName: <%= @bucketName %>
-      #!If
-      #  - 'CreateSubDomains'
-      #  - !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-      #  - !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
       VersioningConfiguration:
         Status: 'Enabled'
       WebsiteConfiguration:
@@ -16,14 +12,14 @@
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket:
-        Ref: AppBucket
+        Ref: <%= @id %>
       PolicyDocument:
         Statement:
-        - Sid: IPAllow
-          Effect: Deny
+        - Sid: 'AllowAccountUsers'
+          Effect: Allow
           Principal: '*'
           Action: s3:GetObject
-          Resource: !Join ['', ['arn:aws:s3:::', !Ref 'AppBucket', /*]]
+          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           Condition:
             IpAddress:
-              aws:SourceIp: !Ref 'AllowedIPRange'
+              aws:SourceIp: !Ref IPWhiteList

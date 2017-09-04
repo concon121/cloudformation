@@ -16,10 +16,6 @@ tags = [
     'value' => 'Small Apps Domain'
   },
   {
-    'key' => 'Environment',
-    'value' => '!FindInMap [EnvironmentConfigurationMap, !Ref Environment, EnvironmentLongName]'
-  },
-  {
     'key' => 'BusinessUnit',
     'value' => 'PUK'
   },
@@ -38,43 +34,44 @@ tags = [
   {
     'key' => 'ProjectCodeBU',
     'value' => 'TODO'
-  },
-  {
-    'key' => 'Criticality',
-    'value' => '!FindInMap [EnvironmentConfigurationMap, prod, Criticality]'
-  },
-  {
-    'key' => 'DataClassification',
-    'value' => '!FindInMap [EnvironmentConfigurationMap, prod, DataClassification]'
   }
 ]
 
-shared = {
-  'id' => 'SharedResources',
-  'key' => 'stacks/pipeline/core-stack.yaml',
-  'tags' => tags,
-  'params' => [
-    {
-      'key' => 'ProjectName',
-      'value' => '!Ref ProjectName'
-    }, {
-      'key' => 'RootDomain',
-      'value' => '!Ref RootDomain'
-    }, {
-      'key' => 'RootDomainZoneID',
-      'value' => '!Ref RootDomainZoneID'
-    }, {
-      'key' => 'SubDomain',
-      'value' => 'calculators'
-    }, {
-      'key' => 'UserRole',
-      'value' => '!Ref UserRole'
-    }
-  ]
-}
+devTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, DataClassification]'
+}]
+
+testTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, DataClassification]'
+}]
+
+prodTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, DataClassification]'
+}]
 
 ipRange = {
-  'key' => 'AllowedIPRange',
+  'key' => 'IPWhiteList',
   'value' => '0.0.0.0/0'
 }
 rootDomain = {
@@ -89,14 +86,36 @@ userRole = {
   'key' => 'UserRole',
   'value' => '!Ref UserRole'
 }
+commonRepo = {
+  'key' => 'CommonRepo',
+  'value' => 'calculators-shared'
+}
+
+shared = {
+  'id' => 'SharedResources',
+  'key' => 'stacks/pipeline/core-stack.yaml',
+  'tags' => tags + prodTags,
+  'params' => [
+    {
+      'key' => 'ProjectName',
+      'value' => 'calculators-shared'
+    }, {
+      'key' => 'RootDomain',
+      'value' => '!Ref RootDomain'
+    }, {
+      'key' => 'SubDomain',
+      'value' => 'calculators'
+    }, rootZone, userRole
+  ]
+}
 
 suf = {
   'id' => 'SUF',
-  'key' => 'stacks/pipeline/small-apps-project-stack.yaml',
+  'key' => 'stacks/small-apps-project-stack.yaml',
   'tags' => tags,
-  'params' => [ipRange, rootDomain, rootZone, userRole, {
+  'params' => [ipRange, rootDomain, rootZone, userRole, commonRepo, {
     'key' => 'ProjectName',
-    'value' => 'SUF'
+    'value' => 'suf'
   }]
 }
 
@@ -110,6 +129,11 @@ end
 
 template 'stacks/small-apps-project-stack.yaml' do
   source 'stacks/small-apps-project-stack.yaml.erb'
+  variables(
+    'devTags' => devTags,
+    'testTags' => testTags,
+    'prodTags' => prodTags
+  )
 end
 
 template 'stacks/pipeline/development-sad-pipeline.yaml' do

@@ -20,6 +20,9 @@ function setUp() {
   echo "Packaging cloudformation template..."
   aws cloudformation package --template-file output/${NAME}.yaml --output-template export-${NAME}.yaml --s3-bucket ${S3_BUCKET}
 
+  echo "Uploading nested stacks to ${S3_BUCKET}"
+  aws s3 cp output/stacks "s3://${S3_BUCKET}/stacks" --recursive
+
   echo "Uploading template to S3 bucket..."
   aws s3 cp export-${NAME}.yaml "s3://${S3_BUCKET}/export-${NAME}.yaml"
 }

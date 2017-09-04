@@ -6,9 +6,11 @@
     Properties:
       HostedZoneConfig:
         Comment: <%= @comment %>
+      <% if @tags && !@tags.nil? %>
       HostedZoneTags:<% @tags.each do |tag| %>
         - Key: <%= tag['key'] %>
           Value: <%= tag['value'] %> <% end %>
+      <% end %>
       Name: <%= @name %>
 
   <%= @id %>NameServers:

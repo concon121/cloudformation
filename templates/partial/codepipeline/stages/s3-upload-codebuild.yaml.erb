@@ -1,6 +1,4 @@
-        - Name: <%= @stageName %>
-          Actions:
-            - Name: "Deployment"
+            - Name: <%= @name %>
               ActionTypeId:
                 Category: "Build"
                 Owner: "AWS"
@@ -11,4 +9,4 @@
                 ProjectName:
                   Ref: <%= @buildName %>
               InputArtifacts:
-                - Name: "app-source"
+                - Name: <%= @input %>

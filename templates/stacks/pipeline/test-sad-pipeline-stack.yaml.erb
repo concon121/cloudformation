@@ -13,11 +13,14 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
-  AllowedIPRange:
+  IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
   UserRole:
     Description: The role that resource access policies will be applied to.
+    Type: String
+  CommonRepo:
+    Description: The name of the gir repository containing the common code
     Type: String
 
 Mappings:
@@ -31,13 +34,13 @@ Resources:
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
-  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, deploy, test]]",
-                       "!Join [-, [!Ref ProjectName, stage, prod]]"] %>
+  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, Deploy, test]]",
+                       "!Join [-, [!Ref ProjectName, Stage, prod]]"] %>
   <% s3Arry = {
       'names' => [stagingBucket, prodStagingBucket],
       'arns' => ['AppBucket']
   } %>
-  <% codecommits = ["!Ref ProjectName"] %>
+  <% codecommits = ["!Ref ProjectName", "!Ref CommonRepo"] %>
 
 <%= partial('iam/pipeline-assumed-role.yaml.erb',
             tag: 'test',
@@ -73,13 +76,13 @@ Resources:
 
 <%= partial('s3/versioned-bucket.yaml.erb',
             id: 'ProdStagingBucket',
-            name: '!Ref ProdStagingBucketName') %>
+            name: prodStagingBucket) %>
 <%= partial('codebuild/s3-upload.yaml.erb',
             tag: 'prod',
             action: 'Stage',
             buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb',
             environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb',
-            s3Bucket: '!Ref ProdStagingBucketName',
+            s3Bucket: prodStagingBucket,
             logicalId: 'ProdStagingUploadBuild',
             cloudfront: false) %>
 
@@ -93,13 +96,20 @@ Resources:
             testing: true,
             branch: 'master',
             repo: '!Ref ProjectName',
+            commonRepo: '!Ref CommonRepo',
             autotrigger: false,
             stagingBucket: stagingBucket) %>
 
   # ---------------------------------------------------------------------------
   # Access Policies
   # ---------------------------------------------------------------------------
-<%= partial('iam/policies/codecommit.yaml.erb',
-            id: 'CodeCommitAccessPolicy',
-            name: "!Join [-, [!Ref ProjectName, 'access', 'policy']]",
-            codecommits: ['!Ref ProjectName']) %>
+
+<%= partial('iam/policies/codebuild.yaml.erb',
+            id: 'CodeBuildAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', test]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
+
+<%= partial('iam/policies/codepipeline.yaml.erb',
+            id: 'CodePipelineAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'access', 'policy', test]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Pipeline, dev]]"]) %>

@@ -31,7 +31,10 @@
 
   <%= @id %>DNSAliases:
     Type: "AWS::Route53::RecordSetGroup"
-    Condition: 'CreateSubDomains'
+    <% if @dependsOn && !@dependsOn.nil? %>
+    DependsOn: <% @dependsOn.each do |dependency| %>
+      - <%= dependency %> <% end %>
+    <% end %>
     Properties:
       HostedZoneName: !Join ['.', [!Ref 'ProjectName', !Ref 'RootDomain', '']]
       Comment: Zone apex alias.
@@ -42,9 +45,9 @@
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
-            DNSName: !GetAtt [WebsiteCloudfront, DomainName]
+            DNSName: !GetAtt [<%= @id %>Cloudfront, DomainName]
         - Name: !Join ['.', [!Ref 'ProjectName', !Ref 'RootDomain']]
           Type: A
           AliasTarget:
             HostedZoneId: 'Z2FDTNDATAQYW2'
-            DNSName: !GetAtt [WebsiteCloudfront, DomainName]
+            DNSName: !GetAtt [<%= @id %>Cloudfront, DomainName]

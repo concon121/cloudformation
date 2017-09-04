@@ -20,9 +20,13 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
-  AllowedIPRange:
+  IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
+  UserRole:
+    Description: The role that resource access policies will be applied to.
+    Type: String
+
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -33,7 +37,7 @@ Resources:
 
   <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]"] %>
   <% s3Arry = {
-      'names' => ['!Ref \'StagingBucketName\''],
+      'names' => [stagingBucket],
       'arns' => ['AppBucket']
     } %>
 
@@ -57,11 +61,20 @@ Resources:
             bucketName: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
 
   # ---------------------------------------------------------------------------
+  # Route 53 Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('route53/hosted-zone.yaml.erb',
+            id: 'ProductionZone',
+            comment: '!Join [\':\', [\'Hosted zone for \', !Ref ProjectName]]') %>
+
+  # ---------------------------------------------------------------------------
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
 <%= partial('cloudfront/cloudfront.yaml.erb',
-            id: 'Production') %>
+            id: 'Production',
+            dependsOn: ['ProductionZone']) %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
@@ -73,12 +86,14 @@ Resources:
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
             logicalId: 'ApplicationUploadBuild',
-            cloudfront: true) %>
+            cloudfront: true,
+            cloudfrontLogicalId: 'ProductionCloudfront') %>
 
   # ---------------------------------------------------------------------------
   # Access Policies
   # ---------------------------------------------------------------------------
-<%= partial('iam/policies/codecommit.yaml.erb',
-            id: 'CodeCommitAccessPolicy',
-            name: "!Join [\'-\', [!Ref ProjectName, 'access', 'policy']]",
-            codecommits: ['!Ref ProjectName']) %>
+
+<%= partial('iam/policies/codebuild.yaml.erb',
+            id: 'CodeBuildAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', prod]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
