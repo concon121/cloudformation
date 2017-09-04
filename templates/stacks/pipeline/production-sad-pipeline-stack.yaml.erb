@@ -54,21 +54,22 @@ Resources:
 
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
-            bucketName: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
+            bucketName: "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]") %>
 
   # ---------------------------------------------------------------------------
   # Route 53 Configuration
   # ---------------------------------------------------------------------------
 
- <%# partial('route53/hosted-zone.yaml.erb',
+<%= partial('route53/hosted-zone.yaml.erb',
            id: 'ProductionZone',
-           comment: '!Join [\':\', [\'Hosted zone for \', !Ref ProjectName]]') %>
+           name: "!Join ['.', [!Ref ProjectName, !Ref RootDomain]]",
+           comment: "!Join [':', ['Hosted zone for ', !Ref ProjectName]]") %>
 
   # ---------------------------------------------------------------------------
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
- <%# partial('cloudfront/cloudfront.yaml.erb',
+<%= partial('cloudfront/cloudfront.yaml.erb',
            id: 'Production',
            dependsOn: ['ProductionZone']) %>
 

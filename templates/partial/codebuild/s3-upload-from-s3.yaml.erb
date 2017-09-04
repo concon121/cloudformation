@@ -5,7 +5,7 @@
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "S3"
-        Location: "<%= @source %>/release.zip"
+        Location: !Join ['/', [<%= @source %>, 'app-source.zip']]
 <%= partial(@buildSpec) %>
       Environment:
         Type: "container"
