@@ -83,4 +83,6 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 
 ## TODO
 
-- Investigate federated logins, how to provide individual git access / permissions to deploy via single sign on.
+- Outputs
+- WAF
+- Naming Conventions

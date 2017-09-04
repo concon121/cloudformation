@@ -1,106 +1,25 @@
-  AppBucket:
+  <%= @id %>:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: PublicReadWrite
-      BucketName: !If
-        - 'CreateSubDomains'
-        - !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-        - !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
+      BucketName: <%= @bucketName %>
       VersioningConfiguration:
         Status: 'Enabled'
       WebsiteConfiguration:
         IndexDocument: !Ref 'IndexDocument'
 
-  AppBucketPolicy:
+  <%= @id %>Policy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket:
-        Ref: AppBucket
+        Ref: <%= @id %>
       PolicyDocument:
         Statement:
-        - Sid: IPAllow
-          Effect: Deny
+        - Sid: 'AllowAccountUsers'
+          Effect: Allow
           Principal: '*'
           Action: s3:GetObject
-          Resource: !Join ['', ['arn:aws:s3:::', !Ref 'AppBucket', /*]]
+          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           Condition:
             IpAddress:
-              aws:SourceIp: !Ref 'AllowedIPRange'
-
-  DefaultZone:
-    Type: "AWS::Route53::HostedZone"
-    Condition: 'CreateSubDomains'
-    Properties:
-      HostedZoneConfig:
-        Comment: 'This is a brand new hosted zone'
-      HostedZoneTags:
-        - Key: 'Test'
-          Value: 'Route'
-      Name: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-
-  WebsiteCloudfront:
-    Type: AWS::CloudFront::Distribution
-    Condition: 'CreateSubDomains'
-    DependsOn:
-    - AppBucket
-    - DefaultZone
-    Properties:
-      DistributionConfig:
-        Comment: Cloudfront Distribution pointing to S3 bucket
-        Origins:
-        - DomainName: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain', !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
-          Id: S3Origin
-          CustomOriginConfig:
-            HTTPPort: '80'
-            HTTPSPort: '443'
-            OriginProtocolPolicy: http-only
-        Enabled: true
-        HttpVersion: 'http2'
-        DefaultRootObject: !Ref 'IndexDocument'
-        Aliases:
-        - !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-        - !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-        DefaultCacheBehavior:
-          AllowedMethods:
-          - GET
-          - HEAD
-          Compress: true
-          TargetOriginId: S3Origin
-          ForwardedValues:
-            QueryString: true
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: allow-all
-        PriceClass: PriceClass_All
-
-  DefaultDNS:
-    Type: "AWS::Route53::RecordSetGroup"
-    Condition: 'CreateSubDomains'
-    Properties:
-      HostedZoneName: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain', '']]
-      Comment: Zone apex alias.
-      RecordSets:
-        - Name: !Sub
-              - www.${Domain}
-              - Domain: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-          Type: A
-          AliasTarget:
-            HostedZoneId: 'Z2FDTNDATAQYW2'
-            DNSName: !GetAtt [WebsiteCloudfront, DomainName]
-        - Name: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-          Type: A
-          AliasTarget:
-            HostedZoneId: 'Z2FDTNDATAQYW2'
-            DNSName: !GetAtt [WebsiteCloudfront, DomainName]
-
-  SubDomainNS:
-    Condition: 'CreateSubDomains'
-    Type: 'AWS::Route53::RecordSet'
-    DependsOn:
-      - DefaultZone
-    Properties:
-      HostedZoneId: !Ref 'RootDomainZoneID'
-      Name: !Join ['.', [<%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
-      Type: 'NS'
-      TTL: 900
-      ResourceRecords: !GetAtt DefaultZone.NameServers
+              aws:SourceIp: !Ref IPWhiteList

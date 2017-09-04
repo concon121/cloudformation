@@ -1,35 +1,164 @@
-template 'development-sad-pipeline.yaml' do
-  source 'sad-pipeline.yaml.erb'
+# =============================================================================
+# Variables
+# =============================================================================
+
+tags = [
+  {
+    'key' => 'Owner',
+    'value' => 'Michael Last'
+  },
+  {
+    'key' => 'Contact',
+    'value' => 'Andover2@prudential.co.uk'
+  },
+  {
+    'key' => 'ApplicationName',
+    'value' => 'Small Apps Domain'
+  },
+  {
+    'key' => 'BusinessUnit',
+    'value' => 'PUK'
+  },
+  {
+    'key' => 'CostCentrePGDS',
+    'value' => 'ITBUEXP'
+  },
+  {
+    'key' => 'CostCentreBU',
+    'value' => 'UKPSRPT'
+  },
+  {
+    'key' => 'ProjectCodePGDS',
+    'value' => 'TODO'
+  },
+  {
+    'key' => 'ProjectCodeBU',
+    'value' => 'TODO'
+  }
+]
+
+devTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, DataClassification]'
+}]
+
+testTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, test, DataClassification]'
+}]
+
+prodTags = [{
+  'key' => 'Environment',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, EnvironmentLongName]'
+}, {
+  'key' => 'Criticality',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, Criticality]'
+}, {
+  'key' => 'DataClassification',
+  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, DataClassification]'
+}]
+
+ipRange = {
+  'key' => 'IPWhiteList',
+  'value' => '0.0.0.0/0'
+}
+rootDomain = {
+  'key' => 'RootDomain',
+  'value' => '!Join [., [calculators, !Ref RootDomain]]'
+}
+rootZone = {
+  'key' => 'RootDomainZoneID',
+  'value' => '!Ref RootDomainZoneID'
+}
+userRole = {
+  'key' => 'UserRole',
+  'value' => '!Ref UserRole'
+}
+commonRepo = {
+  'key' => 'CommonRepo',
+  'value' => 'calculators-shared'
+}
+
+shared = {
+  'id' => 'SharedResources',
+  'key' => 'stacks/pipeline/core-stack.yaml',
+  'tags' => tags + prodTags,
+  'params' => [
+    {
+      'key' => 'ProjectName',
+      'value' => 'calculators-shared'
+    }, {
+      'key' => 'RootDomain',
+      'value' => '!Ref RootDomain'
+    }, {
+      'key' => 'SubDomain',
+      'value' => 'calculators'
+    }, rootZone, userRole
+  ]
+}
+
+suf = {
+  'id' => 'SUF',
+  'key' => 'stacks/small-apps-project-stack.yaml',
+  'tags' => tags,
+  'params' => [ipRange, rootDomain, rootZone, userRole, commonRepo, {
+    'key' => 'ProjectName',
+    'value' => 'suf'
+  }]
+}
+
+# =============================================================================
+# Nested Stacks
+# =============================================================================
+
+template 'stacks/pipeline/core-stack.yaml' do
+  source 'stacks/pipeline/core-stack.yaml.erb'
+end
+
+template 'stacks/small-apps-project-stack.yaml' do
+  source 'stacks/small-apps-project-stack.yaml.erb'
   variables(
-    'environment' => 'dev',
-    'pipeline' => {
-      'enabled' => true,
-      'testing' => false,
-      'codecommitPolicy' => true
-    }
+    'devTags' => devTags,
+    'testTags' => testTags,
+    'prodTags' => prodTags
   )
 end
 
-template 'test-sad-pipeline.yaml' do
-  source 'sad-pipeline.yaml.erb'
-  variables(
-    'environment' => 'test',
-    'pipeline' => {
-      'enabled' => true,
-      'testing' => true,
-      'codecommitPolicy' => false
-    }
-  )
+template 'stacks/pipeline/development-sad-pipeline.yaml' do
+  source 'stacks/pipeline/development-sad-pipeline-stack.yaml.erb'
 end
 
-template 'production-sad-pipeline.yaml' do
-  source 'sad-pipeline.yaml.erb'
+template 'stacks/pipeline/test-sad-pipeline.yaml' do
+  source 'stacks/pipeline/test-sad-pipeline-stack.yaml.erb'
+end
+
+template 'stacks/pipeline/production-sad-pipeline.yaml' do
+  source 'stacks/pipeline/production-sad-pipeline-stack.yaml.erb'
+end
+
+# ============================================================================
+# Main Stack
+# ============================================================================
+
+template 'small-apps-domain.yaml' do
+  source 'small-apps-domain.yaml.erb'
   variables(
-    'environment' => 'prod',
+    'stacks' => [shared, suf],
     'pipeline' => {
-      'enabled' => false,
-      'testing' => false,
-      'codecommitPolicy' => false
+      testing: true,
+      codecommitPolicy: true
     }
   )
 end

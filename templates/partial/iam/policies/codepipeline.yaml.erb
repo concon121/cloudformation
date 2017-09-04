@@ -3,7 +3,7 @@
     Properties:
       PolicyName: <%= @name %>
       Roles:
-        - Ref: PipelineDeployRole
+        - !Ref UserRole
       PolicyDocument:
         Statement:
 <%= partial('iam/policies/actions/codepipeline.yaml.erb',

@@ -1,0 +1,28 @@
+  <%= @id %>:
+    Type: "AWS::Route53::HostedZone"
+    <% if @condition && !@condition.nil? %>
+    Condition: <%= @condition %>
+    <% end %>
+    Properties:
+      HostedZoneConfig:
+        Comment: <%= @comment %>
+      <% if @tags && !@tags.nil? %>
+      HostedZoneTags:<% @tags.each do |tag| %>
+        - Key: <%= tag['key'] %>
+          Value: <%= tag['value'] %> <% end %>
+      <% end %>
+      Name: <%= @name %>
+
+  <%= @id %>NameServers:
+    Type: 'AWS::Route53::RecordSet'
+    <% if @condition && !@condition.nil? %>
+    Condition: <%= @condition %>
+    <% end %>
+    DependsOn:
+      - <%= @id %>
+    Properties:
+      HostedZoneId: !Ref 'RootDomainZoneID'
+      Name: <%= @name %>
+      Type: 'NS'
+      TTL: 900
+      ResourceRecords: !GetAtt <%= @id %>.NameServers

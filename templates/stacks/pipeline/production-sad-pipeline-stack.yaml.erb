@@ -1,0 +1,98 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  RootDomainZoneID:
+    Description: The zone ID of the root domain
+    Type: String
+    Default: ''
+  RootDomain:
+    Description: The root domain
+    Type: String
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+  IPWhiteList:
+    Description: IP addresses allowed to access the static website, in CIDR notation.
+    Type: String
+  UserRole:
+    Description: The role that resource access policies will be applied to.
+    Type: String
+
+
+Mappings:
+<%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
+
+Resources:
+
+  <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
+
+  <% codebuildsArry = ["!Join [\'-\', [!Ref ProjectName, Deploy, prod]]"] %>
+  <% s3Arry = {
+      'names' => [stagingBucket],
+      'arns' => ['AppBucket']
+    } %>
+
+  # ---------------------------------------------------------------------------
+  # IAM Security Role for the <%= @environment %> pipeline
+  # ---------------------------------------------------------------------------
+
+<%= partial('iam/pipeline-assumed-role.yaml.erb',
+            tag: 'prod',
+            pipelineId: 'S3StaticWebsitePipeline',
+            codebuilds: codebuildsArry,
+            s3s: s3Arry,
+            roleId: 'PipelineRole') %>
+
+  # ---------------------------------------------------------------------------
+  # S3 Static Website Bucket
+  # ---------------------------------------------------------------------------
+
+<%= partial('s3/www-bucket.yaml.erb',
+            id: 'AppBucket',
+            bucketName: "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]") %>
+
+  # ---------------------------------------------------------------------------
+  # Route 53 Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('route53/hosted-zone.yaml.erb',
+           id: 'ProductionZone',
+           name: "!Join ['.', [!Ref ProjectName, !Ref RootDomain]]",
+           comment: "!Join [':', ['Hosted zone for ', !Ref ProjectName]]") %>
+
+  # ---------------------------------------------------------------------------
+  # CloudFront Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('cloudfront/cloudfront.yaml.erb',
+           id: 'Production',
+           dependsOn: ['ProductionZone']) %>
+
+  # ---------------------------------------------------------------------------
+  # CodeBuild configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('codebuild/s3-upload-from-s3.yaml.erb',
+            tag: 'prod',
+            action: 'Deploy',
+            buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
+            logicalId: 'ApplicationUploadBuild',
+            cloudfront: false,
+            cloudfrontLogicalId: 'ProductionCloudfront',
+            source: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]',
+            dest: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
+
+  # ---------------------------------------------------------------------------
+  # Access Policies
+  # ---------------------------------------------------------------------------
+
+<%= partial('iam/policies/codebuild.yaml.erb',
+            id: 'CodeBuildAccessPolicy',
+            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', prod]]",
+            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>

@@ -1,14 +1,12 @@
-        - Name: <%= @stageName %>
-          Actions:
-            - Name: "Deployment"
+            - Name: <%= @name %>
               ActionTypeId:
                 Category: "Build"
                 Owner: "AWS"
                 Provider: "CodeBuild"
                 Version: "1"
-              RunOrder: 1
+              RunOrder: <% if @runOrder %><%= @runOrder %><% else %>1<% end %>
               Configuration:
                 ProjectName:
                   Ref: <%= @buildName %>
               InputArtifacts:
-                - Name: "app-source"
+                - Name: <%= @input %>

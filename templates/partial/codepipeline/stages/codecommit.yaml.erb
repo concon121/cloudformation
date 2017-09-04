@@ -1,6 +1,4 @@
-        - Name: "Source"
-          Actions:
-            - Name: "ApplicationSource"
+            - Name: <%= @name %>
               ActionTypeId:
                 Category: "Source"
                 Owner: "AWS"
@@ -8,8 +6,8 @@
                 Version: "1"
               RunOrder: 1
               Configuration:
-                BranchName: !Ref 'WorkingBranch'
-                RepositoryName: !Ref 'CodeCommitProject'
-                PollForSourceChanges: !Ref 'AutoTrigger'
+                BranchName: <%= @branch %>
+                RepositoryName: <%= @repo %>
+                PollForSourceChanges: <%= @autotrigger %>
               OutputArtifacts:
-                - Name: "app-source"
+                - Name: <%= @output %>

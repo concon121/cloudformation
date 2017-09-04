@@ -6,4 +6,4 @@
         - !Ref UserRole
       PolicyDocument:
         Statement:
-<%= partial('iam/policies/actions/codecommit.yaml.erb', codecommits: @codecommits) %>
+<%= partial('iam/policies/actions/codebuild.yaml.erb', codebuilds: @codebuilds) %>
