@@ -1,0 +1,1 @@
+        BuildSpec: "version: 0.2\n\nphases:\n  build:\n    commands:\n      - sudo apt-get update -y\n      - sudo apt-get install libfile-mimeinfo-perl tar -y\n      - aws s3 cp $S3_SOURCE $S3_DEST --recursive"

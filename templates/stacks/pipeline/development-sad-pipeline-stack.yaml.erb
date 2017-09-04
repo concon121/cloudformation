@@ -78,7 +78,8 @@ Resources:
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
             logicalId: 'ApplicationUploadBuild',
-            cloudfront: false) %>
+            cloudfront: false,
+            commonRepo: true) %>
 
   # ---------------------------------------------------------------------------
   # Pipeline definition

@@ -5,16 +5,16 @@
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "S3"
-        Location: @s3Bucket
+        Location: "<%= @source %>/release.zip"
 <%= partial(@buildSpec) %>
       Environment:
         Type: "container"
         Image: "aws/codebuild/ubuntu-base:14.04"
         ComputeType: "small"
         EnvironmentVariables:
-<%= partial(@environmentVars, s3Bucket: @s3Bucket) %>
+<%= partial(@environmentVars, source: @source, dest: @dest) %>
       Artifacts:
-        Type: "CODEPIPELINE"
+        Type: "NO_ARTIFACTS"
       ServiceRole:
         Ref: PipelineRole
       TimeoutInMinutes: 60

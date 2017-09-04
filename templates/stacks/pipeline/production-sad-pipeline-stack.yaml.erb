@@ -16,10 +16,6 @@ Parameters:
     Description: The index document for static S3 websites
     Type: String
     Default: index.html
-  WebsiteRootDirectory:
-    Description: The directory in code commit containing the index file
-    Type: String
-    Default: '.'
   IPWhiteList:
     Description: IP addresses allowed to access the static website, in CIDR notation.
     Type: String
@@ -35,7 +31,7 @@ Resources:
 
   <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
 
-  <% codebuildsArry = ["!Join [\'-\', [!Ref \'ProjectName\', \'Deploy\', \'#{@environment}\']]"] %>
+  <% codebuildsArry = ["!Join [\'-\', [!Ref ProjectName, Deploy, prod]]"] %>
   <% s3Arry = {
       'names' => [stagingBucket],
       'arns' => ['AppBucket']
@@ -64,30 +60,32 @@ Resources:
   # Route 53 Configuration
   # ---------------------------------------------------------------------------
 
-<%= partial('route53/hosted-zone.yaml.erb',
-            id: 'ProductionZone',
-            comment: '!Join [\':\', [\'Hosted zone for \', !Ref ProjectName]]') %>
+ <%# partial('route53/hosted-zone.yaml.erb',
+           id: 'ProductionZone',
+           comment: '!Join [\':\', [\'Hosted zone for \', !Ref ProjectName]]') %>
 
   # ---------------------------------------------------------------------------
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
-<%= partial('cloudfront/cloudfront.yaml.erb',
-            id: 'Production',
-            dependsOn: ['ProductionZone']) %>
+ <%# partial('cloudfront/cloudfront.yaml.erb',
+           id: 'Production',
+           dependsOn: ['ProductionZone']) %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
   # ---------------------------------------------------------------------------
 
-<%= partial('codebuild/s3-upload.yaml.erb',
+<%= partial('codebuild/s3-upload-from-s3.yaml.erb',
             tag: 'prod',
             action: 'Deploy',
-            buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
-            environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
+            buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
             logicalId: 'ApplicationUploadBuild',
-            cloudfront: true,
-            cloudfrontLogicalId: 'ProductionCloudfront') %>
+            cloudfront: false,
+            cloudfrontLogicalId: 'ProductionCloudfront',
+            source: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]',
+            dest: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
 
   # ---------------------------------------------------------------------------
   # Access Policies

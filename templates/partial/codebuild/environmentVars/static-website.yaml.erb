@@ -1,6 +1,8 @@
+          - Name: "RELEASE_NAME"
+            Value: "app-source.zip"
           - Name: "S3_BUCKET"
           <% if @cloudfront && !@cloudfront.nil? %>
-            Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName', !Ref 'RootDomain']]
+            Value: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain']]
           <% else %>
             Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
           <% end %>

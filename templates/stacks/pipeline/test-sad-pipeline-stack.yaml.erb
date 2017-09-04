@@ -68,23 +68,8 @@ Resources:
             action: 'Deploy',
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
-            logicalId: 'ApplicationUploadBuild') %>
-
-  # ---------------------------------------------------------------------------
-  # Production Staging
-  # ---------------------------------------------------------------------------
-
-<%= partial('s3/versioned-bucket.yaml.erb',
-            id: 'ProdStagingBucket',
-            name: prodStagingBucket) %>
-<%= partial('codebuild/s3-upload.yaml.erb',
-            tag: 'prod',
-            action: 'Stage',
-            buildSpec: 'codebuild/buildspecs/zip-and-upload-to-s3.yaml.erb',
-            environmentVars: 'codebuild/environmentVars/zip-and-upload-to-s3.yaml.erb',
-            s3Bucket: prodStagingBucket,
-            logicalId: 'ProdStagingUploadBuild',
-            cloudfront: false) %>
+            logicalId: 'ApplicationUploadBuild',
+            commonRepo: true) %>
 
   # ---------------------------------------------------------------------------
   # Pipeline definition

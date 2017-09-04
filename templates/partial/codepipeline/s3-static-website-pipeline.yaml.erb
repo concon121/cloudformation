@@ -45,5 +45,6 @@
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
             name: 'DeployCommon',
             buildName: "ApplicationUploadBuild",
-            input: commonOutput) %>
+            input: commonOutput,
+            runOrder: 2) %>
 <% end %>

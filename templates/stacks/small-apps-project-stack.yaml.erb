@@ -57,3 +57,13 @@ Resources:
                      {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
                      {'key' => 'CommonRepo', 'value' => '!Ref CommonRepo'}],
             tags: @testTags) %>
+<%= partial('cloudformation/stack.yaml.erb',
+            id: "ProductionStack",
+            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/production-sad-pipeline.yaml\']]",
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
+                     {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},
+                     {'key' => 'IPWhiteList', 'value' => '!Ref IPWhiteList'},
+                     {'key' => 'UserRole', 'value' => '!Ref UserRole'},
+                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'}],
+            tags: @prodTags) %>
