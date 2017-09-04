@@ -86,3 +86,4 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 - Outputs
 - WAF
 - Naming Conventions
+- S3 Server Side Encryption?
