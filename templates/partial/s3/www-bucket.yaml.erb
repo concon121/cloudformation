@@ -16,13 +16,13 @@
       PolicyDocument:
         Statement:
         - Sid: 'AllowUsers'
-          Effect: Allow
+          Effect: <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>Deny<% else %>Allow<% end %>
           Principal: '*'
-          Action: s3:GetObject
+          Action: s3:*
           Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>
           Condition:
-            IpAddress:
+            NotIpAddress:
               aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
                 - <%= ip['value'] %> <% end %>
           <% end %>
