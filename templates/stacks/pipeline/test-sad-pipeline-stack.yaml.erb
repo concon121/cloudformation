@@ -13,9 +13,6 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
-  IPWhiteList:
-    Description: IP addresses allowed to access the static website, in CIDR notation.
-    Type: String
   UserRole:
     Description: The role that resource access policies will be applied to.
     Type: String
@@ -57,7 +54,8 @@ Resources:
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
             tag: 'test',
-            bucketName: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]') %>
+            bucketName: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]',
+            s3IpWhiteList: @ipWhiteList) %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration

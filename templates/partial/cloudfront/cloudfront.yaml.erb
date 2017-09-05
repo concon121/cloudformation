@@ -3,6 +3,10 @@
     Properties:
       DistributionConfig:
         Comment: Cloudfront Distribution pointing to S3 bucket
+        <% if @webAcl && !@webAcl.nil? %>
+        WebACLId:
+          Ref: <%= @webAcl %>
+        <% end %>
         Origins:
         - DomainName: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain', !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
           Id: S3Origin

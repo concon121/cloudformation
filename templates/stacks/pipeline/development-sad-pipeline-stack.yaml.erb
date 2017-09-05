@@ -5,9 +5,6 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
-  IPWhiteList:
-    Description: IP addresses allowed to access the static website, in CIDR notation.
-    Type: String
   UserRole:
     Description: The role that resource access policies will be applied to.
     Type: String
@@ -66,7 +63,8 @@ Resources:
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
             tag: 'dev',
-            bucketName: '!Join [., [www, dev, !Ref ProjectName]]') %>
+            bucketName: '!Join [., [www, dev, !Ref ProjectName]]',
+            s3IpWhiteList: @ipWhiteList) %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration

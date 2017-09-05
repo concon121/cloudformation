@@ -15,11 +15,14 @@
         Ref: <%= @id %>
       PolicyDocument:
         Statement:
-        - Sid: 'AllowAccountUsers'
+        - Sid: 'AllowUsers'
           Effect: Allow
           Principal: '*'
           Action: s3:GetObject
           Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
+          <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>
           Condition:
             IpAddress:
-              aws:SourceIp: !Ref IPWhiteList
+              aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
+                - <%= ip['value'] %> <% end %>
+          <% end %>

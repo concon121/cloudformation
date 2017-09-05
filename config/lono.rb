@@ -70,10 +70,6 @@ prodTags = [{
   'value' => '!FindInMap [EnvironmentConfigurationMap, prod, DataClassification]'
 }]
 
-ipRange = {
-  'key' => 'IPWhiteList',
-  'value' => '0.0.0.0/0'
-}
 rootDomain = {
   'key' => 'RootDomain',
   'value' => '!Join [., [calculators, !Ref RootDomain]]'
@@ -90,6 +86,29 @@ commonRepo = {
   'key' => 'CommonRepo',
   'value' => 'calculators-shared'
 }
+
+ipWhiteList = [{
+  'type' => 'IPV4',
+  'value' => '80.247.48.23/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.53.96/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.48.25/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.48.26/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.53.97/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.48.24/32'
+}, {
+  'type' => 'IPV4',
+  'value' => '80.247.53.37/32'
+}]
 
 shared = {
   'id' => 'SharedResources',
@@ -113,7 +132,7 @@ suf = {
   'id' => 'SUF',
   'key' => 'stacks/small-apps-project-stack.yaml',
   'tags' => tags,
-  'params' => [ipRange, rootDomain, rootZone, userRole, commonRepo, {
+  'params' => [rootDomain, rootZone, userRole, commonRepo, {
     'key' => 'ProjectName',
     'value' => 'suf'
   }]
@@ -138,14 +157,23 @@ end
 
 template 'stacks/pipeline/development-sad-pipeline.yaml' do
   source 'stacks/pipeline/development-sad-pipeline-stack.yaml.erb'
+  variables(
+    'ipWhiteList' => ipWhiteList
+  )
 end
 
 template 'stacks/pipeline/test-sad-pipeline.yaml' do
   source 'stacks/pipeline/test-sad-pipeline-stack.yaml.erb'
+  variables(
+    'ipWhiteList' => ipWhiteList
+  )
 end
 
 template 'stacks/pipeline/production-sad-pipeline.yaml' do
   source 'stacks/pipeline/production-sad-pipeline-stack.yaml.erb'
+  variables(
+    'ipWhiteList' => ipWhiteList
+  )
 end
 
 # ============================================================================

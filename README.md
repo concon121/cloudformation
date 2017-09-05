@@ -87,3 +87,4 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 - WAF
 - Naming Conventions
 - S3 Server Side Encryption?
+- SSL Certificates

@@ -16,9 +16,6 @@ Parameters:
     Description: The index document for static S3 websites
     Type: String
     Default: index.html
-  IPWhiteList:
-    Description: IP addresses allowed to access the static website, in CIDR notation.
-    Type: String
   UserRole:
     Description: The role that resource access policies will be applied to.
     Type: String
@@ -66,12 +63,32 @@ Resources:
            comment: "!Join [':', ['Hosted zone for ', !Ref ProjectName]]") %>
 
   # ---------------------------------------------------------------------------
+  # WAF Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('waf/predicates/IPSet.yaml.erb',
+            id: 'ProductionIPSet',
+            name: "!Join ['', [!Ref ProjectName, IPSet]]",
+            ipSet: @ipWhiteList) %>
+
+<%= partial('waf/rule.yaml.erb',
+            id: 'ProductionIPSetRule',
+            name: "!Join ['', [!Ref ProjectName, WAFRules]]",
+            predicates: [{'id' => 'ProductionIPSet', 'type' => 'IPMatch'}]) %>
+
+<%= partial('waf/web-acl.yaml.erb',
+            id: 'ProductionWebAcl',
+            name: "!Join ['', [!Ref ProjectName, WAF]]",
+            rules: ['ProductionIPSetRule']) %>
+
+  # ---------------------------------------------------------------------------
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
 <%= partial('cloudfront/cloudfront.yaml.erb',
            id: 'Production',
-           dependsOn: ['ProductionZone']) %>
+           dependsOn: ['ProductionZone', 'ProductionWebAcl'],
+           webAcl: 'ProductionWebAcl') %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration

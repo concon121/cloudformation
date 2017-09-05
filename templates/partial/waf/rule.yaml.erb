@@ -1,0 +1,16 @@
+# Valid Values for Predicates[].Type:
+# - IPMatch
+# - ByteMatch
+# - SqlInjectionMatch
+# - SizeConstraint
+# - XssMatch
+  <%= @id %>:
+    Type: "AWS::WAF::Rule"
+    Properties:
+      MetricName: <%= @name %>
+      Name: <%= @name %>
+      Predicates: <% @predicates.each do |predicate| %>
+        - DataId:
+            Ref: <%= predicate['id'] %>
+          Negated: false
+          Type: <%= predicate['type'] %> <% end %>
