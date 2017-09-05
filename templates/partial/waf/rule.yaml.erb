@@ -12,5 +12,5 @@
       Predicates: <% @predicates.each do |predicate| %>
         - DataId:
             Ref: <%= predicate['id'] %>
-          Negated: false
+          Negated: true
           Type: <%= predicate['type'] %> <% end %>
