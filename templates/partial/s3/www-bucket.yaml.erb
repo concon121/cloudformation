@@ -35,7 +35,7 @@
         - Sid: 'AllowPutObjectCommandLine'
           Effect: Allow
           Principal:
-            AWS: !GetAtt [<%= @role %>, Arn]
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
           Action: s3:*
           Resource:
             - !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]

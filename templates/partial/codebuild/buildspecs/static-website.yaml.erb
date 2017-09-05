@@ -7,7 +7,7 @@
           \n      - aws configure set preview.cloudfront true\
           \n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"\
 <% end %>
-          \n      - if [ ! -z `aws s3api list-objects --bucket $S3_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $S3_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi \
+          \n      - if [ ! -z `aws s3api list-objects --bucket $STAGING_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $S3_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi \
           \n      - if [ -f ${RELEASE_NAME} ]; then unzip -n $RELEASE_NAME; fi\
           \n      - zip -r ${RELEASE_NAME} ${ROOT_DIRECTORY} \
-          \n      - aws s3api put-object --key $RELEASE_NAME --bucket $S3_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${RELEASE_NAME}\" --content-type `/usr/bin/mimetype -b \"${RELEASE_NAME}\"`"
+          \n      - aws s3api put-object --key $RELEASE_NAME --bucket $STAGING_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${RELEASE_NAME}\" --content-type `/usr/bin/mimetype -b \"${RELEASE_NAME}\"`"

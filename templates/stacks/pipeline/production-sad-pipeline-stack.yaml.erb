@@ -32,7 +32,7 @@ Resources:
 
   <%
     appBucketName = "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]"
-    testAppBucketName = "!Sub 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-test'"
+    testAppBucketName = "!Sub 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-test'"
     codebuildsArry = [
       "ApplicationUploadBuild"
     ]
@@ -48,6 +48,7 @@ Resources:
 
 <%= partial('iam/pipeline-assumed-role.yaml.erb',
             id: pipelineRoleId,
+            codebuilds: codebuildsArry,
             s3s: s3Arry) %>
 
   # ---------------------------------------------------------------------------
@@ -57,7 +58,8 @@ Resources:
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
             role: pipelineRoleId,
-            bucketName: appBucketName) %>
+            bucketName: appBucketName,
+            s3IpWhiteList: @ipWhiteList) %>
 
 <% if @enableDNS %>
   # ---------------------------------------------------------------------------

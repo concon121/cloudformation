@@ -1,3 +1,9 @@
         BuildSpec: "version: 0.2\n\nphases:\n  build:\n    commands:\n      - sudo apt-get update -y\
         \n      - sudo apt-get install libfile-mimeinfo-perl -y\
-        \n      - aws s3 cp $S3_SOURCE $S3_DEST --recursive"
+        \n      - aws configure set s3.signature_version s3v4 \
+        \n      - for file in `find * -type f`; \
+        do aws s3api put-object --key \"${file}\" --bucket $S3_DEST --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"./${file}\" --content-type `/usr/bin/mimetype -b \"./${file}\"`; done\
+<% if @cloudfront && !@cloudfront.nil? %>
+          \n      - aws configure set preview.cloudfront true\
+          \n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"\
+<% end %>"

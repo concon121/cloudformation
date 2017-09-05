@@ -71,6 +71,7 @@ Resources:
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
             appBucket: appBucketId,
+            stagingBucket: stagingBucketId,
             cloudfront: false,
             commonRepo: true) %>
 

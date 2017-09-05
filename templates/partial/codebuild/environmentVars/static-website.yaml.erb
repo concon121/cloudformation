@@ -3,6 +3,9 @@
           - Name: "S3_BUCKET"
             Value:
               Ref: <%= @appBucket %>
+          - Name: "STAGING_BUCKET"
+            Value:
+              Ref: <%= @stagingBucket %>
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
           - Name: "CLOUDFRONT_DIST_ID"
