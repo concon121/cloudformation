@@ -84,7 +84,6 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 ## TODO
 
 - Outputs
-- WAF
 - Naming Conventions
 - S3 Server Side Encryption?
 - SSL Certificates

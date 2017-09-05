@@ -113,3 +113,15 @@ Resources:
             id: 'CodeBuildAccessPolicy',
             name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', prod]]",
             codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
+
+  # --------------------------------------------------------------------------
+  # Outputs
+  # --------------------------------------------------------------------------
+
+Outputs:
+  WebsiteUrl:
+    Description: The URL to connect to the website via CloudFront
+    Value: !Join ['.', ['http://www', !Ref ProjectName, !Ref RootDomain]]
+  S3WebsiteUrl:
+    Description: The URL to connect to the website via S3 hosting
+    Value: !GetAtt [AppBucket, WebsiteURL]

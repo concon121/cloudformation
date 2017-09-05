@@ -96,3 +96,12 @@ Resources:
             id: 'CodePipelineAccessPolicy',
             name: "!Join [-, [!Ref ProjectName, 'access', 'policy', test]]",
             codebuilds: ["!Join ['-', [!Ref ProjectName, Pipeline, dev]]"]) %>
+
+  # --------------------------------------------------------------------------
+  # Outputs
+  # --------------------------------------------------------------------------
+
+Outputs:
+  WebsiteUrl:
+    Description: The URL to connect to the website
+    Value: !GetAtt [AppBucket, WebsiteURL]
