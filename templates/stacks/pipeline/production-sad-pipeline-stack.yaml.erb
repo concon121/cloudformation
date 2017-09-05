@@ -26,24 +26,29 @@ Mappings:
 
 Resources:
 
-  <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
-
-  <% codebuildsArry = ["!Join [\'-\', [!Ref ProjectName, Deploy, prod]]"] %>
-  <% s3Arry = {
-      'names' => [stagingBucket],
-      'arns' => ['AppBucket']
-    } %>
-
   # ---------------------------------------------------------------------------
   # IAM Security Role for the <%= @environment %> pipeline
   # ---------------------------------------------------------------------------
 
+  <%
+    appBucketName = "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]"
+    testAppBucketName = "!Sub 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-test'"
+    codebuildsArry = [
+      "ApplicationUploadBuild"
+    ]
+    s3Arry = {
+      'arns' => ['AppBucket'],
+      'names' => [testAppBucketName]
+    }
+    codecommits = ["ProjectName", "CommonRepo"]
+    pipelineRoleId = 'PipelineRole'
+    pipelineId = 'ProductionPipeline'
+    buildId = 'ApplicationUploadBuild'
+  %>
+
 <%= partial('iam/pipeline-assumed-role.yaml.erb',
-            tag: 'prod',
-            pipelineId: 'S3StaticWebsitePipeline',
-            codebuilds: codebuildsArry,
-            s3s: s3Arry,
-            roleId: 'PipelineRole') %>
+            id: pipelineRoleId,
+            s3s: s3Arry) %>
 
   # ---------------------------------------------------------------------------
   # S3 Static Website Bucket
@@ -51,8 +56,10 @@ Resources:
 
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
-            bucketName: "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]") %>
+            role: pipelineRoleId,
+            bucketName: appBucketName) %>
 
+<% if @enableDNS %>
   # ---------------------------------------------------------------------------
   # Route 53 Configuration
   # ---------------------------------------------------------------------------
@@ -60,7 +67,7 @@ Resources:
 <%= partial('route53/hosted-zone.yaml.erb',
            id: 'ProductionZone',
            name: "!Join ['.', [!Ref ProjectName, !Ref RootDomain]]",
-           comment: "!Join [':', ['Hosted zone for ', !Ref ProjectName]]") %>
+           comment: "!Join [' ', ['Hosted zone for:', !Ref ProjectName]]") %>
 
   # ---------------------------------------------------------------------------
   # WAF Configuration
@@ -68,17 +75,17 @@ Resources:
 
 <%= partial('waf/predicates/IPSet.yaml.erb',
             id: 'ProductionIPSet',
-            name: "!Join ['', [!Ref ProjectName, IPSet]]",
+            name: "!Join ['', [!Ref ProjectName, IPs]]",
             ipSet: @ipWhiteList) %>
 
 <%= partial('waf/rule.yaml.erb',
             id: 'ProductionIPSetRule',
-            name: "!Join ['', [!Ref ProjectName, WAFRules]]",
+            name: "!Join ['', [!Ref ProjectName, IPsRule]]",
             predicates: [{'id' => 'ProductionIPSet', 'type' => 'IPMatch'}]) %>
 
 <%= partial('waf/web-acl.yaml.erb',
             id: 'ProductionWebAcl',
-            name: "!Join ['', [!Ref ProjectName, WAF]]",
+            name: "!Join ['', [!Ref ProjectName, Access]]",
             rules: ['ProductionIPSetRule']) %>
 
   # ---------------------------------------------------------------------------
@@ -90,20 +97,20 @@ Resources:
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],
            webAcl: 'ProductionWebAcl') %>
 
+<% end %>
+
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
   # ---------------------------------------------------------------------------
 
 <%= partial('codebuild/s3-upload-from-s3.yaml.erb',
-            tag: 'prod',
-            action: 'Deploy',
+            id: buildId,
             buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
             environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
-            logicalId: 'ApplicationUploadBuild',
             cloudfront: false,
             cloudfrontLogicalId: 'ProductionCloudfront',
-            source: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]',
-            dest: '!Join [., [www, !Ref ProjectName, !Ref RootDomain]]') %>
+            source: testAppBucketName,
+            dest: appBucketName) %>
 
   # ---------------------------------------------------------------------------
   # Access Policies
@@ -111,8 +118,7 @@ Resources:
 
 <%= partial('iam/policies/codebuild.yaml.erb',
             id: 'CodeBuildAccessPolicy',
-            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', prod]]",
-            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
+            codebuilds: codebuildsArry) %>
 
   # --------------------------------------------------------------------------
   # Outputs

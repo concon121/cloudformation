@@ -2,8 +2,5 @@
               - "kms:GenerateDataKey*"
               - "kms:Encrypt"
               - "kms:Decrypt"
-            Resource: !Sub
-              - 'arn:aws:kms:${Region}:${Account}:alias/aws/s3'
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3'
             Effect: "Allow"

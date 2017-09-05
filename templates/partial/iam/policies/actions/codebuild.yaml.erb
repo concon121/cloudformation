@@ -8,21 +8,13 @@
               - "codebuild:StartBuild"
               - "codebuild:StopBuild"
             Resource: <% @codebuilds.each do |codebuild| %>
-            - !Sub
-              - arn:aws:codebuild:${Region}:${Account}:project/${Project}
-              - Region: !Ref 'AWS::Region'
-                Account: !Ref 'AWS::AccountId'
-                Project: <%= codebuild %> <% end %>
+              - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${<%= codebuild %>} <% end %>
             Effect: "Allow"
           - Action:
               - "logs:CreateLogGroup"
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
             Resource: <% @codebuilds.each do |codebuild| %>
-              - !Sub
-                - arn:aws:logs:${Region}:${Account}:log-group:/aws/codebuild/${Project}:log-stream:*
-                - Region: !Ref 'AWS::Region'
-                  Account: !Ref 'AWS::AccountId'
-                  Project: <%= codebuild %> <% end %>
+              - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${<%= codebuild %>}:log-stream:* <% end %>
             Effect: "Allow"
 <% end %>

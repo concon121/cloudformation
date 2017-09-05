@@ -1,8 +1,8 @@
-  <%= @roleId %>:
+  <%= @id %>:
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
-      RoleName: !Join ['-', [!Ref 'ProjectName', 'Role', '<%= @tag %>']]
+      RoleName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrole-<%= @tag %>'
       AssumeRolePolicyDocument:
         Version: "2008-10-17"
         Statement:
@@ -16,11 +16,16 @@
             Principal:
               Service: "codebuild.amazonaws.com"
             Action: "sts:AssumeRole"
+          - Sid: "3"
+            Effect: "Allow"
+            Principal:
+              AWS: "arn:aws:iam::977855701381:user/connor"
+            Action: "sts:AssumeRole"
 
   <%= @roleId %>Policy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: !Join ['-', [!Ref 'ProjectName', 'Policy', '<%= @tag %>']]
+      PolicyName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
       Roles:
         - Ref: PipelineRole
       PolicyDocument:

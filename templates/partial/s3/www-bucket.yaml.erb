@@ -16,13 +16,27 @@
       PolicyDocument:
         Statement:
         - Sid: 'AllowUsers'
-          Effect: <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>Deny<% else %>Allow<% end %>
-          Principal: '*'
-          Action: s3:*
-          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>
+          Effect: Deny
+          NotPrincipal:
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          Action: s3:GetObject
+          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           Condition:
-            NotIpAddress:
+            IpAddress:
               aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
                 - <%= ip['value'] %> <% end %>
+          <% else %>
+          Effect: Allow
+          Principal: '*'
+          Action: s3:GetObject
+          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
           <% end %>
+        - Sid: 'AllowPutObjectCommandLine'
+          Effect: Allow
+          Principal:
+            AWS: !GetAtt [<%= @role %>, Arn]
+          Action: s3:*
+          Resource:
+            - !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
+            - !Join ['', ['arn:aws:s3:::', <%= @bucketName %>]]

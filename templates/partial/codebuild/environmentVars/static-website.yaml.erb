@@ -1,11 +1,8 @@
           - Name: "RELEASE_NAME"
             Value: "app-source.zip"
           - Name: "S3_BUCKET"
-          <% if @cloudfront && !@cloudfront.nil? %>
-            Value: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain']]
-          <% else %>
-            Value: !Join ['.', ['www', <%= @tag %>, !Ref 'ProjectName']]
-          <% end %>
+            Value:
+              Ref: <%= @appBucket %>
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
           - Name: "CLOUDFRONT_DIST_ID"

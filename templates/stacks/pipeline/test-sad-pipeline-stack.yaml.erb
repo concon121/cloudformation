@@ -25,27 +25,32 @@ Mappings:
 
 Resources:
 
-  <% stagingBucket =  '!Join [-, [!Ref ProjectName, staging, test, !Ref \'AWS::AccountId\']]' %>
-  <% prodStagingBucket =  '!Join [-, [!Ref ProjectName, staging, prod, !Ref \'AWS::AccountId\']]' %>
+  # ---------------------------------------------------------------------------
+  # IAM Security Role for the pipeline to assume
+  # ---------------------------------------------------------------------------
 
-  # ---------------------------------------------------------------------------
-  # IAM Security Role for the <%= @environment %> pipeline
-  # ---------------------------------------------------------------------------
-  <% codebuildsArry = ["!Join [-, [!Ref ProjectName, Deploy, test]]",
-                       "!Join [-, [!Ref ProjectName, Stage, prod]]"] %>
-  <% s3Arry = {
-      'names' => [stagingBucket, prodStagingBucket],
-      'arns' => ['AppBucket']
-  } %>
-  <% codecommits = ["!Ref ProjectName", "!Ref CommonRepo"] %>
+  <%
+    appBucketId = 'AppBucket'
+    appBucketName = "!Sub 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-test'"
+    stagingBucket =  "!Sub 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-test'"
+    codebuildsArry = [
+        "ApplicationUploadBuild"
+    ]
+    s3Arry = {
+        'arns' => ['AppBucket', 'TestPipelineStagingBucket']
+    }
+    codecommits = ["ProjectName", "CommonRepo"]
+    pipelineRoleId = 'PipelineRole'
+    pipelineId = 'TestPipeline'
+    buildId = 'ApplicationUploadBuild'
+    stagingBucketId = pipelineId + 'StagingBucket'
+  %>
 
 <%= partial('iam/pipeline-assumed-role.yaml.erb',
-            tag: 'test',
-            pipelineId: 'S3StaticWebsitePipeline',
+            id: pipelineRoleId,
             codebuilds: codebuildsArry,
             s3s: s3Arry,
-            codecommits: codecommits,
-            roleId: 'PipelineRole') %>
+            codecommits: codecommits) %>
 
   # ---------------------------------------------------------------------------
   # S3 Static Website Bucket
@@ -53,8 +58,8 @@ Resources:
 
 <%= partial('s3/www-bucket.yaml.erb',
             id: 'AppBucket',
-            tag: 'test',
-            bucketName: '!Join [\'.\', [www, test, !Ref \'ProjectName\']]',
+            bucketName: appBucketName,
+            role: pipelineRoleId,
             s3IpWhiteList: @ipWhiteList) %>
 
   # ---------------------------------------------------------------------------
@@ -62,26 +67,31 @@ Resources:
   # ---------------------------------------------------------------------------
 
 <%= partial('codebuild/s3-upload.yaml.erb',
-            tag: 'test',
-            action: 'Deploy',
+            id: buildId,
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
-            logicalId: 'ApplicationUploadBuild',
+            appBucket: appBucketId,
+            cloudfront: false,
             commonRepo: true) %>
 
   # ---------------------------------------------------------------------------
   # Pipeline definition
   # ---------------------------------------------------------------------------
 
+<%= partial('s3/default-bucket.yaml.erb',
+            id: stagingBucketId,
+            name: stagingBucket) %>
+
 <%= partial('codepipeline/s3-static-website-pipeline.yaml.erb',
-            tag: 'test',
-            buildName: "!Join ['-', [!Ref 'ProjectName', 'Build', 'test']]",
+            id: pipelineId,
+            role: pipelineRoleId,
+            buildName: buildId,
             testing: true,
             branch: 'master',
             repo: '!Ref ProjectName',
             commonRepo: '!Ref CommonRepo',
             autotrigger: false,
-            stagingBucket: stagingBucket) %>
+            stagingBucket: stagingBucketId) %>
 
   # ---------------------------------------------------------------------------
   # Access Policies
@@ -89,13 +99,11 @@ Resources:
 
 <%= partial('iam/policies/codebuild.yaml.erb',
             id: 'CodeBuildAccessPolicy',
-            name: "!Join [-, [!Ref ProjectName, 'Deploy', 'access', 'policy', test]]",
-            codebuilds: ["!Join ['-', [!Ref ProjectName, Deploy, dev]]"]) %>
+            codebuilds: codebuildsArry) %>
 
 <%= partial('iam/policies/codepipeline.yaml.erb',
             id: 'CodePipelineAccessPolicy',
-            name: "!Join [-, [!Ref ProjectName, 'access', 'policy', test]]",
-            codebuilds: ["!Join ['-', [!Ref ProjectName, Pipeline, dev]]"]) %>
+            pipelines: [pipelineId]) %>
 
   # --------------------------------------------------------------------------
   # Outputs

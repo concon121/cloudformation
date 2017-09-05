@@ -1,7 +1,7 @@
-  <%= @logicalId %>:
+  <%= @id %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Join ['-', [!Ref 'ProjectName', '<%= @action %>', '<%= @tag %>']]
+      Name: !Sub 'pr52-cb-${ProjectName}-deploy-<%= @tag %>'
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "S3"
@@ -12,7 +12,7 @@
         Image: "aws/codebuild/ubuntu-base:14.04"
         ComputeType: "small"
         EnvironmentVariables:
-<%= partial(@environmentVars, source: @source, dest: @dest) %>
+<%= partial(@environmentVars) %>
       Artifacts:
         Type: "NO_ARTIFACTS"
       ServiceRole:

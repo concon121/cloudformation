@@ -1,9 +1,3 @@
-  <%= @id %>:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: <%= @name %>
-      Roles:
-        - !Ref UserRole
-      PolicyDocument:
-        Statement:
-<%= partial('iam/policies/actions/codebuild.yaml.erb', codebuilds: @codebuilds) %>
+<%= partial('iam/policies/managed-policy.yaml.erb',
+            name: 'codebuild',
+            policyDoc: 'iam/policies/actions/codebuild.yaml.erb') %>

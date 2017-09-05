@@ -17,10 +17,6 @@
               - "codecommit:GetUploadArchiveStatus"
               - "codecommit:UploadArchive"
             Resource: <% @codecommits.each do |codecommit| %>
-              - !Sub
-                - 'arn:aws:codecommit:${Region}:${Account}:${Project}'
-                - Region: !Ref 'AWS::Region'
-                  Account: !Ref 'AWS::AccountId'
-                  Project:  <%= codecommit %> <% end %>
+              - !Sub 'arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${<%= codecommit %>}'<% end %>
             Effect: "Allow"
 <% end %>

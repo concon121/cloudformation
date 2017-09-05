@@ -158,21 +158,25 @@ end
 template 'stacks/pipeline/development-sad-pipeline.yaml' do
   source 'stacks/pipeline/development-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList
+    'ipWhiteList' => ipWhiteList,
+    'tag' => 'dev'
   )
 end
 
 template 'stacks/pipeline/test-sad-pipeline.yaml' do
   source 'stacks/pipeline/test-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList
+    'ipWhiteList' => ipWhiteList,
+    'tag' => 'test'
   )
 end
 
 template 'stacks/pipeline/production-sad-pipeline.yaml' do
   source 'stacks/pipeline/production-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList
+    'ipWhiteList' => ipWhiteList,
+    'tag' => 'prod',
+    'enableDNS' => false
   )
 end
 

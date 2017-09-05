@@ -26,10 +26,10 @@ Mappings:
 Resources:
 <%= partial('route53/hosted-zone.yaml.erb',
             id: 'SharedResourcesZone',
-            comment: '!Join [\' \' , [\'Root Domain for\', !Ref ProjectName]]',
-            name: '!Join [., [!Ref SubDomain, !Ref RootDomain]]',
+            comment: "!Join [' ' , ['Root Domain for:', !Ref ProjectName]]",
+            name: "!Join [., [!Ref SubDomain, !Ref RootDomain]]",
             tags: [{'key' => 'Example', 'value' => 'Tag'}]) %>
 <%= partial('codecommit/repository.yaml.erb',
             id: 'SharedResourcesRepo',
             name: '!Ref ProjectName',
-            description: '!Join [\' \' , [\'Git repository for\', !Ref ProjectName]]') %>
+            description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>

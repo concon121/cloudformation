@@ -1,22 +1,17 @@
-  <%= @logicalId %>:
+  <%= @id %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Join ['-', [!Ref 'ProjectName', '<%= @action %>', '<%= @tag %>']]
+      Name: !Sub 'pr52-cb-${ProjectName}-deploy-<%= @tag %>'
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"
-<%= partial(@buildSpec, cloudfront: @cloudfront) %>
+<%= partial(@buildSpec) %>
       Environment:
         Type: "container"
         Image: "aws/codebuild/ubuntu-base:14.04"
         ComputeType: "small"
         EnvironmentVariables:
-<%= partial(@environmentVars,
-            s3Bucket: @s3Bucket,
-            cloudfront: @cloudfront,
-            cloudfrontLogicalId: @cloudfrontLogicalId,
-            tag: @tag,
-            commonRepo: @commonRepo) %>
+<%= partial(@environmentVars) %>
       Artifacts:
         Type: "CODEPIPELINE"
       ServiceRole:

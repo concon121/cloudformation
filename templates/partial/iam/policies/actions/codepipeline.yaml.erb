@@ -9,10 +9,6 @@
               - "codepipeline:PutJobFailureResult"
               - "codepipeline:RetryStageExecution"
             Resource: <% @pipelines.each do |pipeline| %>
-              - !Sub
-                - arn:aws:codepipeline:${Region}:${Account}:${Pipeline}
-                - Region: !Ref 'AWS::Region'
-                  Account: !Ref 'AWS::AccountId'
-                  Pipeline: <%= pipeline %>
-            Effect: "Allow" <% end %>
+              - !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${<%= pipeline %>} <% end %>
+            Effect: "Allow"
 <% end %>
