@@ -37,57 +37,57 @@ tags = [
   }
 ]
 
-devTags = [{
+dev_tags = [{
   'key' => 'Environment',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, EnvironmentLongName]'
+  'value' => '!FindInMap [EnvironmentConfiguration, dev, EnvironmentLongName]'
 }, {
   'key' => 'Criticality',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, Criticality]'
+  'value' => '!FindInMap [EnvironmentConfiguration, dev, Criticality]'
 }, {
   'key' => 'DataClassification',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, dev, DataClassification]'
+  'value' => '!FindInMap [EnvironmentConfiguration, dev, DataClassification]'
 }]
 
-testTags = [{
+test_tags = [{
   'key' => 'Environment',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, test, EnvironmentLongName]'
+  'value' => '!FindInMap [EnvironmentConfiguration, test, EnvironmentLongName]'
 }, {
   'key' => 'Criticality',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, test, Criticality]'
+  'value' => '!FindInMap [EnvironmentConfiguration, test, Criticality]'
 }, {
   'key' => 'DataClassification',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, test, DataClassification]'
+  'value' => '!FindInMap [EnvironmentConfiguration, test, DataClassification]'
 }]
 
-prodTags = [{
+prod_tags = [{
   'key' => 'Environment',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, EnvironmentLongName]'
+  'value' => '!FindInMap [EnvironmentConfiguration, prod, EnvironmentLongName]'
 }, {
   'key' => 'Criticality',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, Criticality]'
+  'value' => '!FindInMap [EnvironmentConfiguration, prod, Criticality]'
 }, {
   'key' => 'DataClassification',
-  'value' => '!FindInMap [EnvironmentConfigurationMap, prod, DataClassification]'
+  'value' => '!FindInMap [EnvironmentConfiguration, prod, DataClassification]'
 }]
 
-rootDomain = {
+root_domain = {
   'key' => 'RootDomain',
   'value' => '!Join [., [calculators, !Ref RootDomain]]'
 }
-rootZone = {
+root_zone = {
   'key' => 'RootDomainZoneID',
   'value' => '!Ref RootDomainZoneID'
 }
-userRole = {
+user_role = {
   'key' => 'UserRole',
   'value' => '!Ref UserRole'
 }
-commonRepo = {
+common_repo = {
   'key' => 'CommonRepo',
   'value' => 'calculators-shared'
 }
 
-ipWhiteList = [{
+ip_white_list = [{
   'type' => 'IPV4',
   'value' => '80.247.48.23/32'
 }, {
@@ -113,7 +113,7 @@ ipWhiteList = [{
 shared = {
   'id' => 'SharedResources',
   'key' => 'stacks/pipeline/core-stack.yaml',
-  'tags' => tags + prodTags,
+  'tags' => tags + prod_tags,
   'params' => [
     {
       'key' => 'ProjectName',
@@ -124,7 +124,7 @@ shared = {
     }, {
       'key' => 'SubDomain',
       'value' => 'calculators'
-    }, rootZone, userRole
+    }, root_zone, user_role
   ]
 }
 
@@ -132,7 +132,7 @@ suf = {
   'id' => 'SUF',
   'key' => 'stacks/small-apps-project-stack.yaml',
   'tags' => tags,
-  'params' => [rootDomain, rootZone, userRole, commonRepo, {
+  'params' => [root_domain, root_zone, user_role, common_repo, {
     'key' => 'ProjectName',
     'value' => 'suf'
   }]
@@ -149,16 +149,16 @@ end
 template 'stacks/small-apps-project-stack.yaml' do
   source 'stacks/small-apps-project-stack.yaml.erb'
   variables(
-    'devTags' => devTags,
-    'testTags' => testTags,
-    'prodTags' => prodTags
+    'dev_tags' => dev_tags,
+    'test_tags' => test_tags,
+    'prod_tags' => prod_tags
   )
 end
 
 template 'stacks/pipeline/development-sad-pipeline.yaml' do
   source 'stacks/pipeline/development-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList,
+    'ip_white_list' => ip_white_list,
     'tag' => 'dev'
   )
 end
@@ -166,7 +166,7 @@ end
 template 'stacks/pipeline/test-sad-pipeline.yaml' do
   source 'stacks/pipeline/test-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList,
+    'ip_white_list' => ip_white_list,
     'tag' => 'test'
   )
 end
@@ -174,9 +174,9 @@ end
 template 'stacks/pipeline/production-sad-pipeline.yaml' do
   source 'stacks/pipeline/production-sad-pipeline-stack.yaml.erb'
   variables(
-    'ipWhiteList' => ipWhiteList,
+    'ip_white_list' => ip_white_list,
     'tag' => 'prod',
-    'enableDNS' => false
+    'enableDNS' => true
   )
 end
 
