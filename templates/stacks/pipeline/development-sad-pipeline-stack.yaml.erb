@@ -5,9 +5,6 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
-  UserRole:
-    Description: The role that resource access policies will be applied to.
-    Type: String
   IndexDocument:
     Description: The index document for static S3 websites
     Type: String
@@ -90,7 +87,7 @@ Resources:
   # Pipeline definition
   # ---------------------------------------------------------------------------
 
-<%= partial('s3/default-bucket.yaml.erb',
+<%= partial('s3/versioned-bucket.yaml.erb',
             id: stagingBucketId,
             name: stagingBucket) %>
 

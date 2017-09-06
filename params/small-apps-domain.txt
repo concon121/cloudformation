@@ -1,3 +1,2 @@
 RootDomainZoneID=Z3P3H2NORORNMS
 RootDomain=spacegoats.co.uk
-UserRole=cb-codecommit-test

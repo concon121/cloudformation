@@ -1,13 +1,12 @@
         BuildSpec:
           "version: 0.2\n\nphases:\n  build:\n    commands:\n      - sudo apt-get update -y\
           \n      - sudo apt-get install libfile-mimeinfo-perl zip unzip jq -y\
-          \n      - for file in `cd ${ROOT_DIRECTORY} && find * -type f`; \
-          do aws s3api put-object --key \"${file}\" --bucket $S3_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${ROOT_DIRECTORY}/${file}\" --content-type `/usr/bin/mimetype -b \"${ROOT_DIRECTORY}/${file}\"`; done\
+          \n      - if [ ! -z `aws s3api list-objects --bucket $STAGING_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $STAGING_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi \
+          \n      - if [ -f ${RELEASE_NAME} ]; then unzip -n $RELEASE_NAME; fi\
+          \n      - aws s3 sync --acl public-read --sse AES256 --delete ${ROOT_DIRECTORY} s3://${S3_BUCKET}
 <% if @cloudfront && !@cloudfront.nil? %>
           \n      - aws configure set preview.cloudfront true\
           \n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"\
 <% end %>
-          \n      - if [ ! -z `aws s3api list-objects --bucket $STAGING_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $S3_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi \
-          \n      - if [ -f ${RELEASE_NAME} ]; then unzip -n $RELEASE_NAME; fi\
           \n      - zip -r ${RELEASE_NAME} ${ROOT_DIRECTORY} \
-          \n      - aws s3api put-object --key $RELEASE_NAME --bucket $STAGING_BUCKET --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers --body \"${RELEASE_NAME}\" --content-type `/usr/bin/mimetype -b \"${RELEASE_NAME}\"`"
+          \n      - aws s3 cp ${RELEASE_NAME} s3://${STAGING_BUCKET} --acl public-read --sse AES256"

@@ -13,9 +13,6 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
-  UserRole:
-    Description: The role that resource access policies will be applied to.
-    Type: String
   CommonRepo:
     Description: The name of the gir repository containing the common code
     Type: String
@@ -80,7 +77,7 @@ Resources:
   # Pipeline definition
   # ---------------------------------------------------------------------------
 
-<%= partial('s3/default-bucket.yaml.erb',
+<%= partial('s3/versioned-bucket.yaml.erb',
             id: stagingBucketId,
             name: stagingBucket) %>
 

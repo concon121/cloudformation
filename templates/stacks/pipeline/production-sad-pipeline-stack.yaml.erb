@@ -16,10 +16,10 @@ Parameters:
     Description: The index document for static S3 websites
     Type: String
     Default: index.html
-  UserRole:
-    Description: The role that resource access policies will be applied to.
+  WebsiteRootDirectory:
+    Description: The directory in code commit containing the index file
     Type: String
-
+    Default: '.'
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>

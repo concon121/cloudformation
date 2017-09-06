@@ -78,10 +78,6 @@ root_zone = {
   'key' => 'RootDomainZoneID',
   'value' => '!Ref RootDomainZoneID'
 }
-user_role = {
-  'key' => 'UserRole',
-  'value' => '!Ref UserRole'
-}
 common_repo = {
   'key' => 'CommonRepo',
   'value' => 'calculators-shared'
@@ -124,7 +120,7 @@ shared = {
     }, {
       'key' => 'SubDomain',
       'value' => 'calculators'
-    }, root_zone, user_role
+    }, root_zone
   ]
 }
 
@@ -132,7 +128,7 @@ suf = {
   'id' => 'SUF',
   'key' => 'stacks/small-apps-project-stack.yaml',
   'tags' => tags,
-  'params' => [root_domain, root_zone, user_role, common_repo, {
+  'params' => [root_domain, root_zone, common_repo, {
     'key' => 'ProjectName',
     'value' => 'suf'
   }]

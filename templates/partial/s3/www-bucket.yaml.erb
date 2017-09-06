@@ -1,5 +1,5 @@
   <%= @id %>:
-    Type: "AWS::S3::Bucket"
+    Type: AWS::S3::Bucket
     Properties:
       AccessControl: PublicReadWrite
       BucketName: <%= @bucketName %>
@@ -15,28 +15,19 @@
         Ref: <%= @id %>
       PolicyDocument:
         Statement:
-        - Sid: 'AllowUsers'
-          <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>
-          Effect: Deny
-          NotPrincipal:
-            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
-          Action: s3:GetObject
-          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
-          Condition:
-            IpAddress:
-              aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
-                - <%= ip['value'] %> <% end %>
-          <% else %>
-          Effect: Allow
-          Principal: '*'
-          Action: s3:GetObject
-          Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
-          <% end %>
-        - Sid: 'AllowPutObjectCommandLine'
-          Effect: Allow
-          Principal:
-            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
-          Action: s3:*
-          Resource:
-            - !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, /*]]
-            - !Join ['', ['arn:aws:s3:::', <%= @bucketName %>]]
+          - Sid: 'AllowUsers'
+            <% if @s3IpWhiteList && !@s3IpWhiteList.nil? %>
+            Effect: 'Deny'
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]
+            Condition:
+              NotIpAddress:
+                aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
+                  - <%= ip['value'] %> <% end %>
+            <% else %>
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]
+            <% end %>
