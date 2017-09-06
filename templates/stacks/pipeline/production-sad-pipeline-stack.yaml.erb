@@ -59,7 +59,7 @@ Resources:
             id: 'AppBucket',
             role: pipelineRoleId,
             bucketName: appBucketName,
-            s3IpWhiteList: @ipWhiteList) %>
+            s3IpWhiteList: @ip_white_list) %>
 
 <% if @enableDNS %>
   # ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ Resources:
 
 <%= partial('waf/predicates/IPSet.yaml.erb',
             id: 'ProductionIPSet',
-            ipSet: @ipWhiteList) %>
+            ipSet: @ip_white_list) %>
 
 <%= partial('waf/rule.yaml.erb',
             id: 'ProductionIPSetRule',
@@ -108,7 +108,7 @@ Resources:
             id: buildId,
             buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
             environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
-            cloudfront: false,
+            cloudfront: true,
             cloudfrontLogicalId: 'ProductionCloudfront',
             role: pipelineRoleId,
             source: testAppBucketName,
