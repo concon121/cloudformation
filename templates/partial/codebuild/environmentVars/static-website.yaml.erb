@@ -9,7 +9,7 @@
           - Name: "ROOT_DIRECTORY"
             Value: !Ref 'WebsiteRootDirectory'
           - Name: "CLOUDFRONT_DIST_ID"
-          <% if @cloudfront && !@cloudfront.nil? %>
+          <% if @cloudfrontLogicalId && !@cloudfrontLogicalId.nil? %>
             Value:
                 Ref: <%= @cloudfrontLogicalId %>
           <% else %>

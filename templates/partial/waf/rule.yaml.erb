@@ -1,14 +1,16 @@
+# -----------------------------------------------------------------------------
 # Valid Values for Predicates[].Type:
 # - IPMatch
 # - ByteMatch
 # - SqlInjectionMatch
 # - SizeConstraint
 # - XssMatch
+# -----------------------------------------------------------------------------
   <%= @id %>:
     Type: "AWS::WAF::Rule"
     Properties:
-      MetricName: <%= @name %>
-      Name: <%= @name %>
+      MetricName: !Join ['', [!Ref ProjectName, <%= @name %>, <%= @tag %>]]
+      Name: !Sub 'pr-wafr-${ProjectName}-<%= @name %>-${AWS::AccountId}-prod'
       Predicates: <% @predicates.each do |predicate| %>
         - DataId:
             Ref: <%= predicate['id'] %>

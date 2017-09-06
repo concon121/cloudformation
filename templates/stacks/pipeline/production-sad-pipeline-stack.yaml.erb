@@ -77,12 +77,11 @@ Resources:
 
 <%= partial('waf/predicates/IPSet.yaml.erb',
             id: 'ProductionIPSet',
-            name: "!Join ['', [!Ref ProjectName, IPs]]",
             ipSet: @ipWhiteList) %>
 
 <%= partial('waf/rule.yaml.erb',
             id: 'ProductionIPSetRule',
-            name: "!Join ['', [!Ref ProjectName, IPsRule]]",
+            name: "ipsrule",
             predicates: [{'id' => 'ProductionIPSet', 'type' => 'IPMatch'}]) %>
 
 <%= partial('waf/web-acl.yaml.erb',
@@ -111,6 +110,7 @@ Resources:
             environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
             cloudfront: false,
             cloudfrontLogicalId: 'ProductionCloudfront',
+            role: pipelineRoleId,
             source: testAppBucketName,
             dest: appBucketName) %>
 

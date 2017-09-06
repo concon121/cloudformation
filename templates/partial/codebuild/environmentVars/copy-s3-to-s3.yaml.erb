@@ -1,6 +1,9 @@
-          - Name: "S3_SOURCE"
-            Value: !Sub
-              - "s3://${Bucket}"
-              - Bucket: <%= @source %>
           - Name: "S3_DEST"
             Value: <%= @dest %>
+          - Name: "CLOUDFRONT_DIST_ID"
+          <% if @cloudfrontLogicalId && !@cloudfrontLogicalId.nil? %>
+            Value:
+                Ref: <%= @cloudfrontLogicalId %>
+          <% else %>
+            Value: 'N/A'
+          <% end %>
