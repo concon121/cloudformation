@@ -1,7 +1,7 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gem 'colorize'
-gem 'lono', '2.1.0'
+gem 'lono'
 gem 'rails-erb-lint'
 gem 'rake'
 

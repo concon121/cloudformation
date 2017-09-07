@@ -21,10 +21,6 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
-  NestedStackS3Bucket:
-    Description: HTTP URL for the S3 bucket where the stacks are located
-    Type: String
-    Default: 'https://s3-eu-west-1.amazonaws.com/general-s3-store'
   CommonRepo:
     Description: The name of the gir repository containing the common code
     Type: String
@@ -35,7 +31,7 @@ Mappings:
 Resources:
 <%= partial('cloudformation/stack.yaml.erb',
             id: "DevelopmentStack",
-            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/development-sad-pipeline.yaml\']]",
+            url: "stacks/pipeline/development-sad-pipeline.yaml",
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
                      {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
@@ -43,7 +39,7 @@ Resources:
             tags: @devTags) %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: "TestStack",
-            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/test-sad-pipeline.yaml\']]",
+            url: "!stacks/pipeline/test-sad-pipeline.yaml",
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
                      {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
@@ -51,7 +47,7 @@ Resources:
             tags: @testTags) %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: "ProductionStack",
-            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', \'stacks/pipeline/production-sad-pipeline.yaml\']]",
+            url: "stacks/pipeline/production-sad-pipeline.yaml",
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
                      {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},

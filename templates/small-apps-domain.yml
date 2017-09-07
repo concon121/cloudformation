@@ -10,10 +10,6 @@ Parameters:
   RootDomain:
     Description: The root domain
     Type: String
-  NestedStackS3Bucket:
-    Description: HTTP URL for the S3 bucket where the stacks are located
-    Type: String
-    Default: 'https://s3-eu-west-1.amazonaws.com/general-s3-store'
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -24,9 +20,9 @@ Resources:
   <% key = stack['key'] %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: stack['id'],
-            url: "!Join [\'/\', [!Ref \'NestedStackS3Bucket\', #{key}]]",
+            url: key,
             params: stack['params'],
-            tags: stack['tags'],
+            tags: @tags || @core_tags,
             devTags: stack['devTags'],
             testTags: stack['testTags'],
             prodTags: stack['prodTags']) %>
