@@ -1,0 +1,8 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Core Resources
+
+Resources:
+<%= partial('s3/versioned-bucket.yaml',
+            id: 'CloudformationStacks',
+            name: "!Sub 's3-cb-${AWS::AccountId}-cloudformationtemplates-prod'") %>

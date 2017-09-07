@@ -1,0 +1,11 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Root stack for <%= @project %>
+
+Resources:
+  <% @stacks.each do |stack| %>
+<%= partial('cloudformation/stack',
+            id: stack['id'],
+            url: stack['url'],
+            tags: stack['tags']) %>
+  <% end %>

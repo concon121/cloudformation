@@ -1,0 +1,9 @@
+  <%= @id %>:
+    Type: "AWS::RDS::DBSecurityGroup"
+    Properties:
+      DBSecurityGroupIngress:
+        <% if @ips && !@ips.nil? %>
+        <% @ips.each do |ip| %>
+        - CIDRIP: <%= ip %><% end %>
+        <% end %>
+      GroupDescription: <%= @description %>

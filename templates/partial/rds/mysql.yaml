@@ -1,0 +1,15 @@
+  <%= @id %>:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AllocatedStorage: '5'
+      BackupRetentionPeriod: '3'
+      DBInstanceClass: 'db.t2.micro'
+      DBInstanceIdentifier: 'rds-<%= @project %>-<%= @usage %>-<%= @tag %>'
+      DBName: <%= @name %>
+      Engine: 'MySQL'
+      MasterUsername: <%= @rootUser %>
+      MasterUserPassword: <%= @rootPass %>
+      MonitoringInterval: 0
+      Port: '3306'
+      PubliclyAccessible: true
+      StorageEncrypted: false

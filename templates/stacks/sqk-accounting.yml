@@ -1,0 +1,11 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Infrastructure for SQK Accounting
+
+Resources:
+
+<%= partial('rds/mysql.yaml',
+            id: 'WordPressDB',
+            name: 'sqkaccwp',
+            usage: 'wordpress',
+            securityGroup: 'AllowAll') %>
