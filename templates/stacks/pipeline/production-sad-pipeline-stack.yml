@@ -59,7 +59,7 @@ Resources:
 <%= partial('s3/versioned-bucket.yaml.erb',
             id: 'AppBucket',
             role: pipelineRoleId,
-            bucketName: appBucketName) %>
+            name: appBucketName) %>
 
 <%= partial('s3/policy/private.yaml.erb',
             id: 'AppBucket',

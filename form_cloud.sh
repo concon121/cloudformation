@@ -12,13 +12,20 @@ cd $WORKING_DIR
 
 . variables.sh
 
-lono generate
+#LONO_ENV=dev lono generate
+#LONO_ENV=test lono generate
+LONO_ENV=prod lono generate
 
 stackExists=`aws cloudformation list-stacks | jq -r "[.StackSummaries[] | select(.StackName == \"${NAME}\")] | .[0].StackStatus"`
 
 function setUp() {
-  #echo "Packaging cloudformation template..."
-  #aws cloudformation package --template-file output/${NAME}.yml --output-template SmallAppsDomain/SmallAppsDomain/${NAME}.yml --s3-bucket ${S3_BUCKET}
+  echo "Packaging cloudformation template..."
+  #aws cloudformation package --template-file output/small-apps-domain.yml  --s3-bucket ${S3_BUCKET} --s3-prefix 'SmallAppsDomain'
+  #for file in `find output -type f | grep ".yml"`
+  #do
+  #  echo $file
+
+  #done
 
   echo "Uploading nested stacks to ${S3_BUCKET}"
   aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive

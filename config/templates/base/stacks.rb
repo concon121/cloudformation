@@ -1,8 +1,8 @@
-template 'stacks/pipeline/core-stack' do
+template 'prod/stacks/pipeline/core-stack' do
   source 'stacks/pipeline/core-stack'
 end
 
-template 'stacks/small-apps-project-stack' do
+template 'prod/stacks/small-apps-project-stack' do
   source 'stacks/small-apps-project-stack'
 end
 
@@ -21,7 +21,7 @@ common_repo = {
 
 shared = {
   'id' => 'SharedResources',
-  'key' => 'stacks/pipeline/core-stack.yml',
+  'key' => 'stacks/pipeline/core-stack',
   'params' => [
     {
       'key' => 'ProjectName',
@@ -38,7 +38,7 @@ shared = {
 
 suf = {
   'id' => 'SUF',
-  'key' => 'stacks/small-apps-project-stack.yml',
+  'key' => 'stacks/small-apps-project-stack',
   'params' => [root_domain, root_zone, common_repo, {
     'key' => 'ProjectName',
     'value' => 'suf'

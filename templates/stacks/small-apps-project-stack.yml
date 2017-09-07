@@ -31,7 +31,7 @@ Mappings:
 Resources:
 <%= partial('cloudformation/stack.yaml.erb',
             id: "DevelopmentStack",
-            url: "stacks/pipeline/development-sad-pipeline.yaml",
+            url: template_s3_path('stacks/pipeline/development-sad-pipeline'),
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
                      {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
@@ -39,7 +39,7 @@ Resources:
             tags: @devTags) %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: "TestStack",
-            url: "!stacks/pipeline/test-sad-pipeline.yaml",
+            url: template_s3_path("stacks/pipeline/test-sad-pipeline"),
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
                      {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
@@ -47,7 +47,7 @@ Resources:
             tags: @testTags) %>
 <%= partial('cloudformation/stack.yaml.erb',
             id: "ProductionStack",
-            url: "stacks/pipeline/production-sad-pipeline.yaml",
+            url: template_s3_path("stacks/pipeline/production-sad-pipeline"),
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
                      {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},

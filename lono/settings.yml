@@ -1,0 +1,6 @@
+s3:
+  path:
+    default: s3://pgds-cross-account-access
+    dev: s3://pgds-cross-account-access
+    test: s3://pgds-cross-account-access
+    prod: s3://pgds-cross-account-access
