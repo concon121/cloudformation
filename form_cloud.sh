@@ -17,11 +17,16 @@ lono generate
 stackExists=`aws cloudformation list-stacks | jq -r "[.StackSummaries[] | select(.StackName == \"${NAME}\")] | .[0].StackStatus"`
 
 function setUp() {
-  #echo "Packaging cloudformation template..."
-  #aws cloudformation package --template-file output/${NAME}.yml --output-template SmallAppsDomain/SmallAppsDomain/${NAME}.yml --s3-bucket ${S3_BUCKET}
+  echo "Packaging cloudformation template..."
+  aws cloudformation package --template-file output/small-apps-domain.yml --output-template-file SmallAppsDomain/small-apps-domain.yml --s3-bucket ${S3_BUCKET}
+  #for file in `find output -type f | grep ".yml"`
+  #do
+  #  echo $file
+
+  #done
 
   echo "Uploading nested stacks to ${S3_BUCKET}"
-  aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive
+  #  aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive
 
   #echo "Uploading template to S3 bucket..."
   #aws s3 cp SmallAppsDomain/${NAME}.yml "s3://${S3_BUCKET}/SmallAppsDomain/${NAME}.yml"
@@ -48,22 +53,22 @@ then
   setUp
   testIsValid
   echo "Starting creation..."
-  aws cloudformation create-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
-  --stack-name ${NAME} \
-  --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
+  #  aws cloudformation create-stack \
+  #  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
+  #  --stack-name ${NAME} \
+  #  --capabilities "CAPABILITY_NAMED_IAM" \
+  #  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
 elif [[ *"${stackExists}"* != "IN_PROGRESS" ]]
 then
   echo "Updating the stack: ${NAME}"
   setUp
   testIsValid
   echo "Starting update... "
-  aws cloudformation update-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
-  --stack-name ${NAME} \
-  --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
+  #  aws cloudformation update-stack \
+  #  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
+  #  --stack-name ${NAME} \
+  #  --capabilities "CAPABILITY_NAMED_IAM" \
+  #  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
 else
   echo "Work in progress, please try again later: ${stackExists}"
 fi
