@@ -134,3 +134,7 @@ Outputs:
   S3WebsiteUrl:
     Description: The URL to connect to the website via S3 hosting
     Value: !GetAtt [AppBucket, WebsiteURL]
+  CodeBuildPolicy:
+    Description: The policy which allows access to CodeBuild
+    Value:
+      Ref: 'CodeBuildAccessPolicy'

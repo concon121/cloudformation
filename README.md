@@ -84,6 +84,4 @@ ${EnvironmentTag}.${ProjectName}.${RootDomain}
 ## TODO
 
 - Outputs
-- Naming Conventions
-- S3 Server Side Encryption?
 - SSL Certificates

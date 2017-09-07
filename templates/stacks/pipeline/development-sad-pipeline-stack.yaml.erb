@@ -127,3 +127,24 @@ Outputs:
   WebsiteUrl:
     Description: The URL to connect to the website
     Value: !GetAtt [AppBucket, WebsiteURL]
+  CodeCommitPolicy:
+    Description: The policy which allows access to CodeCommit
+    Value:
+      Ref: 'CodeCommitAccessPolicy'
+  CodeBuildPolicy:
+    Description: The policy which allows access to CodeBuild
+    Value:
+      Ref: 'CodeBuildAccessPolicy'
+  CodePipelinePolicy:
+    Description: The policy which allows access to CodePipeline
+    Value:
+      Ref: 'CodePipelineAccessPolicy'
+  GitRepo:
+    Description: The name of the Git repository
+    Value: !GetAtt [DevelopmentRepo, Name]
+  GitRepoCloneUrlHttp:
+    Description: The URL to clone the Git repository via HTTP
+    Value: !GetAtt [DevelopmentRepo, CloneUrlHttp]
+  GitRepoCloneUrlSsh:
+    Description: The URL to clone the Git repository via SSH
+    Value: !GetAtt [DevelopmentRepo, CloneUrlSsh]

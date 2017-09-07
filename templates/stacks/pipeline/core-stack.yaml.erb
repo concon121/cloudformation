@@ -30,3 +30,21 @@ Resources:
             id: 'SharedResourcesRepo',
             name: '!Ref ProjectName',
             description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>
+
+Outputs:
+  GitRepo:
+    Description: The name of the Git repository
+    Value: !GetAtt [SharedResourcesRepo, Name]
+  GitRepoCloneUrlHttp:
+    Description: The URL to clone the Git repository via HTTP
+    Value: !GetAtt [SharedResourcesRepo, CloneUrlHttp]
+  GitRepoCloneUrlSsh:
+    Description: The URL to clone the Git repository via SSH
+    Value: !GetAtt [SharedResourcesRepo, CloneUrlSsh]
+  ZoneID:
+    Description: The zone id for the newly created zone
+    Value:
+      Ref: 'SharedResourcesZone'
+  DomainName:
+    Description: The newly created domain name
+    Value: !Join [., [!Ref SubDomain, !Ref RootDomain]]
