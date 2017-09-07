@@ -56,11 +56,10 @@ Resources:
   # S3 Static Website Bucket
   # ---------------------------------------------------------------------------
 
-<%= partial('s3/www-bucket.yaml.erb',
+<%= partial('s3/versioned-bucket.yaml.erb',
             id: 'AppBucket',
             role: pipelineRoleId,
-            bucketName: appBucketName,
-            s3IpWhiteList: @ip_white_list) %>
+            bucketName: appBucketName) %>
 
 <% if @enableDNS %>
   # ---------------------------------------------------------------------------
