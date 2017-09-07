@@ -61,6 +61,11 @@ Resources:
             role: pipelineRoleId,
             bucketName: appBucketName) %>
 
+<%= partial('s3/policy/private.yaml.erb',
+            id: 'AppBucket',
+            bucketName: appBucketName) %>
+
+
 <% if @enableDNS %>
   # ---------------------------------------------------------------------------
   # Route 53 Configuration
