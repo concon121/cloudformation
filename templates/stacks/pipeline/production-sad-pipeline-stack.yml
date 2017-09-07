@@ -61,9 +61,6 @@ Resources:
             role: pipelineRoleId,
             name: appBucketName) %>
 
-<%= partial('s3/policy/private.yaml.erb',
-            id: 'AppBucket',
-            bucketName: appBucketName) %>
 
 
 <% if @enableDNS %>
