@@ -17,19 +17,14 @@ lono generate
 stackExists=`aws cloudformation list-stacks | jq -r "[.StackSummaries[] | select(.StackName == \"${NAME}\")] | .[0].StackStatus"`
 
 function setUp() {
-  echo "Packaging cloudformation template..."
-  aws cloudformation package --template-file output/${NAME}.yml --output-template export-${NAME}.yml --s3-bucket ${S3_BUCKET}
-
   echo "Uploading nested stacks to ${S3_BUCKET}"
-  aws s3 cp output/stacks "s3://${S3_BUCKET}/stacks" --recursive
-
-  echo "Uploading template to S3 bucket..."
-  aws s3 cp export-${NAME}.yml "s3://${S3_BUCKET}/export-${NAME}.yml"
+  aws s3 cp output/ "s3://${S3_BUCKET}" --recursive
+  #aws s3 cp output/stacks "s3://${S3_BUCKET}/stacks" --recursive
 }
 
 function testIsValid() {
   echo "Testing the template is valid..."
-  aws cloudformation validate-template --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yml" 1> /dev/null
+  aws cloudformation validate-template --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/${NAME}.yml" 1> /dev/null
 
   if [[ $? -gt 0 ]]
   then
@@ -39,7 +34,7 @@ function testIsValid() {
 
 function tidyUp() {
   echo "Tidying up!"
-  rm -f export-${NAME}.yml
+  rm -f ${NAME}.yml
 }
 
 
@@ -50,7 +45,7 @@ then
   testIsValid
   echo "Starting creation..."
   aws cloudformation create-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yml" \
+  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM"
 elif [[ *"${stackExists}"* != "IN_PROGRESS" ]]
@@ -60,7 +55,7 @@ then
   testIsValid
   echo "Starting update... "
   aws cloudformation update-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yml" \
+  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM"
 else

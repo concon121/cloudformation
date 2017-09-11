@@ -2,10 +2,96 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Infrastructure for SQK Accounting
 
-Resources:
+Mappings:
+<%= partial('maps/ami.yaml') %>
 
+Resources:
+<%= partial('cloudwatch/log-group.yaml',
+            id: 'WebServerLogs',
+            retention: '30') %>
 <%= partial('rds/mysql.yaml',
             id: 'WordPressDB',
             name: 'sqkaccwp',
             usage: 'wordpress',
             securityGroup: 'AllowAll') %>
+
+  WebServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: '/'
+      Roles:
+      - !Ref WebServerIAMRole
+  WebServerIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - 'ec2.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+      - PolicyName: logs
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            - 'logs:DescribeLogStreams'
+            Resource:
+            - 'arn:aws:logs:*:*:*'
+  WebServerIAMPolicySSHAccess:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      Roles:
+      - !Ref WebServerIAMRole
+      PolicyName: iam
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - 'iam:ListUsers'
+          Resource:
+          - '*'
+        - Effect: Allow
+          Action:
+          - 'iam:ListSSHPublicKeys'
+          - 'iam:GetSSHPublicKey'
+          Resource:
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:user/*'
+  WebServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: '/'
+      Roles:
+      - !Ref WebServerIAMRole
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'wordpress-ec2'
+      VpcId: vpc-27ef854e
+      SecurityGroupIngress:
+      - FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+  DatabaseSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'wordpress-rds'
+      VpcId: vpc-27ef854e
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !Ref WebServerSecurityGroup
+<%= partial('autoscaling/wordpress-launch-config.yaml',
+            id: 'WordPressEC2',
+            domainName: 'sqkaccounting.co.uk') %>

@@ -6,6 +6,6 @@ Resources:
   <% @stacks.each do |stack| %>
 <%= partial('cloudformation/stack',
             id: stack['id'],
-            url: stack['url'],
+            url: '!Sub https://s3.${AWS::Region}.amazonaws.com/cf-templates-1dltlmjnkcgt2-${AWS::Region}/' + stack['url'],
             tags: stack['tags']) %>
   <% end %>

@@ -1,0 +1,12 @@
+  <%= @id %>:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: <%= @description %>
+      SecurityGroupIngress:
+      - FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+      - FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+        CidrIp: '0.0.0.0/0'
