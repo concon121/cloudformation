@@ -2,3 +2,4 @@ logs
 output
 export*.yaml
 *.lock
+lambdas/**/lib
