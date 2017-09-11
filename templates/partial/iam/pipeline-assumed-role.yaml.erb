@@ -27,7 +27,7 @@
     Properties:
       PolicyName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
       Roles:
-        - Ref: PipelineRole
+        - Ref: <%= @id %>
       PolicyDocument:
         Statement:
 <%= partial('iam/policies/actions/kms.yaml.erb', codecommits: @codecommits) %>

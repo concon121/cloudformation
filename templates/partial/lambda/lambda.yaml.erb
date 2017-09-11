@@ -1,0 +1,11 @@
+  <%= @id %>:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: <%= @bucket %>
+        S3Key: <%= @key %>
+      Description: <%= @description %>
+      FunctionName: !Sub pr52-lam-${ProjectName}-<%= @name %>-<%= @tag %>
+      Handler: <%= @handler %>
+      Role: <%= @role %>
+      Runtime: <%= @runtime %>

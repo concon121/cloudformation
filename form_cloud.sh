@@ -33,7 +33,7 @@ function setUp() {
   echo "Uploading lambda zip for ${S3_BUCKET}"
   mkdir -p lambdas/cloudfront-origin-access-identity/lib
   pip install -r lambdas/cloudfront-origin-access-identity/requirements.txt -t lambdas/cloudfront-origin-access-identity/lib --upgrade
-  zip lambdas/pr52-lam-sad-cloudfrontoriginaccessidentity.zip lambdas/cloudfront-origin-access-identity/*
+  cd lambdas/cloudfront-origin-access-identity && zip ../pr52-lam-sad-cloudfrontoriginaccessidentity.zip * && cd ../..
 
   aws s3 cp "lambdas/pr52-lam-sad-cloudfrontoriginaccessidentity.zip" "s3://${S3_BUCKET}/SmallAppsDomain/lambda-source/"
 
