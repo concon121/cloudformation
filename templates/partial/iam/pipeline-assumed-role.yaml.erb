@@ -19,7 +19,7 @@
           - Sid: "3"
             Effect: "Allow"
             Principal:
-              AWS: "arn:aws:iam::977855701381:user/connor"
+              Service: "lambda.amazonaws.com"
             Action: "sts:AssumeRole"
 
   <%= @roleId %>Policy:
@@ -35,3 +35,4 @@
 <%= partial('iam/policies/actions/codecommit.yaml.erb', codecommits: @codecommits) %>
 <%= partial('iam/policies/actions/codebuild.yaml.erb', codebuilds: @codebuilds) %>
 <%= partial('iam/policies/actions/cloudfront-invalidate.yaml.erb') %>
+<%= partial('iam/policies/actions/cloudfront-create-origin-access-identity.yaml.erb') %>
