@@ -8,12 +8,15 @@
           Ref: <%= @webAcl %>
         <% end %>
         Origins:
-        - DomainName: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain', !FindInMap [RegionMap, !Ref 'AWS::Region', S3WebsiteEndpoint]]]
-          Id: S3Origin
+        - DomainName: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain', s3, amazonaws, com]]
+          Id: S3Origin<% if @originAccessIdentity %>
+          S3OriginConfig:
+            OriginAccessIdentity: !Join ['/', ['origin-access-identity', 'cloudfront', <%= @originAccessIdentity %>]]
+          <% else %>
           CustomOriginConfig:
             HTTPPort: '80'
             HTTPSPort: '443'
-            OriginProtocolPolicy: http-only
+            OriginProtocolPolicy: http-only <% end %>
         Enabled: true
         HttpVersion: 'http2'
         DefaultRootObject: !Ref 'IndexDocument'

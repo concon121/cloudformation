@@ -20,10 +20,8 @@ def lambda_handler(event, context):
     success = True
     reason = None
     responseData = {
-        'data': {
-            'CallerReference': event['ResourceProperties']['Reference'],
-            'Comment': event['ResourceProperties']['Comment']
-        }
+        'CallerReference': event['ResourceProperties']['Reference'],
+        'Comment': event['ResourceProperties']['Comment']
     }
 
     try:
@@ -33,8 +31,8 @@ def lambda_handler(event, context):
                 print('Response: {}'.format(response))
                 if response['CloudFrontOriginAccessIdentity'] is not None:
                     success = True
-                    responseData['data']['Id'] = response['CloudFrontOriginAccessIdentity']['Id']
-                    responseData['data']['S3CanonicalUserId'] = response['CloudFrontOriginAccessIdentity']['S3CanonicalUserId']
+                    responseData['Id'] = response['CloudFrontOriginAccessIdentity']['Id']
+                    responseData['S3CanonicalUserId'] = response['CloudFrontOriginAccessIdentity']['S3CanonicalUserId']
                 else:
                     success = False
                     print(sys.exc_info()[0])
@@ -69,8 +67,8 @@ def lambda_handler(event, context):
                         )
                         if updateResponse['CloudFrontOriginAccessIdentity'] is not None:
                             success = True
-                            responseData['data']['Id'] = updateResponse['CloudFrontOriginAccessIdentity']['Id']
-                            responseData['data']['S3CanonicalUserId'] = updateResponse['CloudFrontOriginAccessIdentity']['S3CanonicalUserId']
+                            responseData['Id'] = updateResponse['CloudFrontOriginAccessIdentity']['Id']
+                            responseData['S3CanonicalUserId'] = updateResponse['CloudFrontOriginAccessIdentity']['S3CanonicalUserId']
                         else:
                             success = False
                             reason = 'Failed to UPDATE Origin Access Identity'

@@ -59,10 +59,21 @@ Resources:
   # S3 Static Website Bucket
   # ---------------------------------------------------------------------------
 
+  OriginAccessIdentity:
+    Type: 'AWS::CloudFormation::CustomResource'
+    Properties:
+      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
+      Reference: !Ref ProjectName
+      Comment: !Sub 'CloudFront origin access identity for: ${ProjectName}'
+
 <%= partial('s3/versioned-bucket.yaml.erb',
             id: 'AppBucket',
             role: pipelineRoleId,
             name: appBucketName) %>
+<%= partial('s3/policy/cloudfront-origin-access-identity.yaml.erb',
+            id: 'AppBucket',
+            canonicalUser: '!GetAtt [OriginAccessIdentity, S3CanonicalUserId]',
+            bucketName: appBucketName) %>
 
 
 
@@ -98,16 +109,13 @@ Resources:
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
-  OriginAccessIdentity:
-    Type: 'AWS::CloudFormation::CustomResource'
-    Properties:
-      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
-      Reference: !Ref ProjectName
-      Comment: !Sub 'CloudFront origin access identity for ${ProjectName}'
+
 <%= partial('cloudfront/cloudfront.yaml.erb',
            id: 'Production',
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],
-           webAcl: 'ProductionWebAcl') %>
+           webAcl: 'ProductionWebAcl',
+           originAccessIdentity: '!GetAtt [OriginAccessIdentity, Id]') %>
+
 
 <% end %>
 
