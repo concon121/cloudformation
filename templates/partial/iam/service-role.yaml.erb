@@ -1,0 +1,23 @@
+  <%= @id %>:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub 'pr-iam-${ProjectName}-<%= @name %>-<%= @tag %>'
+      AssumeRolePolicyDocument:
+        Version: "2008-10-17"
+        Statement:<% @services.each do |service| %>
+          - Sid: <%= service %>
+            Effect: "Allow"
+            Principal:
+              Service: "<%= service %>.amazonaws.com"
+            Action: "sts:AssumeRole"<% end %>
+
+  <%= @roleId %>Policy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
+      Roles:
+        - Ref: <%= @id %>
+      PolicyDocument:
+        Statement:<% @policies.each do |policy| %>
+<%= partial(policy) %><% end %>

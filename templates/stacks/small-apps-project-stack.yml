@@ -1,0 +1,59 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Project root stack for the Small Apps Domain'
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  RootDomainZoneID:
+    Description: The zone ID of the root domain
+    Type: String
+    Default: ''
+  RootDomain:
+    Description: The root domain
+    Type: String
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+  WebsiteRootDirectory:
+    Description: The directory in code commit containing the index file
+    Type: String
+    Default: '.'
+  CommonRepo:
+    Description: The name of the gir repository containing the common code
+    Type: String
+  CloudFrontOriginAccessIdentityResource:
+    Description: The ARN for the resource which creates cloudfront origin access identities
+    Type: String
+
+Mappings:
+<%= partial('mappings/environment-configuration.yaml.erb') %>
+
+Resources:
+<%= partial('cloudformation/stack.yaml.erb',
+            id: "DevelopmentStack",
+            url: template_s3_path('stacks/pipeline/development-sad-pipeline'),
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
+                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
+                     {'key' => 'CommonRepo', 'value' => '!Ref CommonRepo'}],
+            tags: @devTags) %>
+<%= partial('cloudformation/stack.yaml.erb',
+            id: "TestStack",
+            url: template_s3_path("stacks/pipeline/test-sad-pipeline"),
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
+                     {'key' => 'WebsiteRootDirectory', 'value' => '!Ref WebsiteRootDirectory'},
+                     {'key' => 'CommonRepo', 'value' => '!Ref CommonRepo'}],
+            tags: @testTags) %>
+<%= partial('cloudformation/stack.yaml.erb',
+            id: "ProductionStack",
+            url: template_s3_path("stacks/pipeline/production-sad-pipeline"),
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
+                     {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},
+                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
+                     {'key' => 'CloudFrontOriginAccessIdentityResource', 'value' => '!Ref CloudFrontOriginAccessIdentityResource'}],
+            tags: @prodTags) %>

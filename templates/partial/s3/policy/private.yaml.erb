@@ -1,0 +1,13 @@
+  <%= @id %>Policy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: <%= @id %>
+      PolicyDocument:
+        Statement:
+          - Sid: 'DenyAll'
+            Effect: 'Deny'
+            NotPrincipal:
+              AWS: !GetAtt [<%= @role %>, Arn]
+            Action: 's3:*'
+            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]

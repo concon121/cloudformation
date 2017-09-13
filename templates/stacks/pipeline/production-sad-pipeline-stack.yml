@@ -1,0 +1,150 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Production stack for the Small Apps Domain'
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  RootDomainZoneID:
+    Description: The zone ID of the root domain
+    Type: String
+    Default: ''
+  RootDomain:
+    Description: The root domain
+    Type: String
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+  WebsiteRootDirectory:
+    Description: The directory in code commit containing the index file
+    Type: String
+    Default: '.'
+  CloudFrontOriginAccessIdentityResource:
+    Description: The ARN for the resource which creates cloudfront origin access identities
+    Type: String
+
+Mappings:
+<%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
+
+Resources:
+
+  # ---------------------------------------------------------------------------
+  # IAM Security Role for the <%= @environment %> pipeline
+  # ---------------------------------------------------------------------------
+
+  <%
+    appBucketName = "!Join ['.', [www, !Ref ProjectName, !Ref RootDomain]]"
+    testAppBucketName = "!Sub 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-test'"
+    codebuildsArry = [
+      "ApplicationUploadBuild"
+    ]
+    s3Arry = {
+      'arns' => ['AppBucket'],
+      'names' => [testAppBucketName]
+    }
+    codecommits = ["ProjectName", "CommonRepo"]
+    pipelineRoleId = 'PipelineRole'
+    pipelineId = 'ProductionPipeline'
+    buildId = 'ApplicationUploadBuild'
+  %>
+
+<%= partial('iam/pipeline-assumed-role.yaml.erb',
+            id: pipelineRoleId,
+            codebuilds: codebuildsArry,
+            s3s: s3Arry) %>
+
+  # ---------------------------------------------------------------------------
+  # S3 Static Website Bucket
+  # ---------------------------------------------------------------------------
+
+<%= partial('s3/versioned-bucket.yaml.erb',
+            id: 'AppBucket',
+            role: pipelineRoleId,
+            name: appBucketName) %>
+
+
+
+<% if @enableDNS %>
+  # ---------------------------------------------------------------------------
+  # Route 53 Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('route53/hosted-zone.yaml.erb',
+           id: 'ProductionZone',
+           name: "!Join ['.', [!Ref ProjectName, !Ref RootDomain]]",
+           comment: "!Join [' ', ['Hosted zone for:', !Ref ProjectName]]") %>
+
+  # ---------------------------------------------------------------------------
+  # WAF Configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('waf/predicates/IPSet.yaml.erb',
+            id: 'ProductionIPSet',
+            ipSet: @ip_white_list) %>
+
+<%= partial('waf/rule.yaml.erb',
+            id: 'ProductionIPSetRule',
+            name: "ipsrule",
+            predicates: [{'id' => 'ProductionIPSet', 'type' => 'IPMatch'}]) %>
+
+<%= partial('waf/web-acl.yaml.erb',
+            id: 'ProductionWebAcl',
+            name: "!Join ['', [!Ref ProjectName, Access]]",
+            rules: ['ProductionIPSetRule']) %>
+
+  # ---------------------------------------------------------------------------
+  # CloudFront Configuration
+  # ---------------------------------------------------------------------------
+
+#  OriginAccessIdentity:
+#    Type: 'AWS::CloudFormation::CustomResource'
+#    Properties:
+#      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
+#      Reference: !Ref ProjectName
+#      Comment: !Sub 'CloudFront origin access identity for ${ProjectName}'
+<%= partial('cloudfront/cloudfront.yaml.erb',
+           id: 'Production',
+           dependsOn: ['ProductionZone', 'ProductionWebAcl'],
+           webAcl: 'ProductionWebAcl') %>
+
+<% end %>
+
+  # ---------------------------------------------------------------------------
+  # CodeBuild configuration
+  # ---------------------------------------------------------------------------
+
+<%= partial('codebuild/s3-upload-from-s3.yaml.erb',
+            id: buildId,
+            buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
+            environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
+            cloudfront: true,
+            cloudfrontLogicalId: 'ProductionCloudfront',
+            role: pipelineRoleId,
+            source: testAppBucketName,
+            dest: appBucketName) %>
+
+  # ---------------------------------------------------------------------------
+  # Access Policies
+  # ---------------------------------------------------------------------------
+
+<%= partial('iam/policies/codebuild.yaml.erb',
+            id: 'CodeBuildAccessPolicy',
+            codebuilds: codebuildsArry) %>
+
+  # --------------------------------------------------------------------------
+  # Outputs
+  # --------------------------------------------------------------------------
+
+Outputs:
+  WebsiteUrl:
+    Description: The URL to connect to the website via CloudFront
+    Value: !Join ['.', ['http://www', !Ref ProjectName, !Ref RootDomain]]
+  S3WebsiteUrl:
+    Description: The URL to connect to the website via S3 hosting
+    Value: !GetAtt [AppBucket, WebsiteURL]
+  CodeBuildPolicy:
+    Description: The policy which allows access to CodeBuild
+    Value:
+      Ref: 'CodeBuildAccessPolicy'

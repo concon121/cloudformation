@@ -1,0 +1,9 @@
+          - Action:
+              - "cloudfront:CreateCloudFrontOriginAccessIdentity"
+              - "cloudfront:ListCloudFrontOriginAccessIdentities"
+              - "cloudfront:GetCloudFrontOriginAccessIdentityConfig"
+              - "cloudfront:UpdateCloudFrontOriginAccessIdentity"
+              - "cloudfront:DeleteCloudFrontOriginAccessIdentity"
+            Resource:
+              - '*'
+            Effect: 'Allow'

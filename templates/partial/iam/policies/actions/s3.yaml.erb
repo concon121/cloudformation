@@ -4,6 +4,7 @@
               - "s3:PutObjectAcl"
               - "s3:GetObject"
               - "s3:GetObjectVersion"
+              - "s3:*"
             Resource:
             <% if @s3s['names'] && !@s3s['names'].nil? %>
             <% @s3s['names'].each do |s3| %>

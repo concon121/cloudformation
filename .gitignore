@@ -2,3 +2,6 @@ logs
 output
 export*.yaml
 *.lock
+lambdas/**/**
+!lambdas/**/lambda_function.py
+!lambdas/**/requirements.txt

@@ -12,34 +12,45 @@ cd $WORKING_DIR
 
 . variables.sh
 
-lono generate
+#LONO_ENV=dev lono generate
+#LONO_ENV=test lono generate
 
 stackExists=`aws cloudformation list-stacks | jq -r "[.StackSummaries[] | select(.StackName == \"${NAME}\")] | .[0].StackStatus"`
 
 function setUp() {
+
+  echo "Uploading lambda zip for ${S3_BUCKET}"
+  mkdir -p lambdas/cloudfront-origin-access-identity/lib
+  pip install -r lambdas/cloudfront-origin-access-identity/requirements.txt -t lambdas/cloudfront-origin-access-identity --upgrade
+  cd lambdas/cloudfront-origin-access-identity && zip -r ../pr52-lam-sad-cloudfrontoriginaccessidentity.zip * && cd ../..
+
+  aws s3 cp "lambdas/pr52-lam-sad-cloudfrontoriginaccessidentity.zip" "s3://${S3_BUCKET}/SmallAppsDomain/lambda-source/"
+  version=`aws s3api list-object-versions --bucket pgds-cross-account-access --prefix 'SmallAppsDomain/lambda-source/pr52-lam-sad-cloudfrontoriginaccessidentity.zip' | jq -r .Versions[0].VersionId`
+  export LAMBDA_VERSION=$version
+  echo "The lambda version is: $LAMBDA_VERSION"
+
   echo "Packaging cloudformation template..."
-  aws cloudformation package --template-file output/${NAME}.yaml --output-template export-${NAME}.yaml --s3-bucket ${S3_BUCKET}
+  LONO_ENV=prod lono generate
 
   echo "Uploading nested stacks to ${S3_BUCKET}"
-  aws s3 cp output/stacks "s3://${S3_BUCKET}/stacks" --recursive
-
-  echo "Uploading template to S3 bucket..."
-  aws s3 cp export-${NAME}.yaml "s3://${S3_BUCKET}/export-${NAME}.yaml"
+  aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive
+  
 }
 
 function testIsValid() {
   echo "Testing the template is valid..."
-  aws cloudformation validate-template --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yaml" 1> /dev/null
+  aws cloudformation validate-template --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" 1> /dev/null
 
   if [[ $? -gt 0 ]]
   then
     exit 1
   fi
+
+  sleep 5
 }
 
 function tidyUp() {
   echo "Tidying up!"
-  rm -f export-${NAME}.yaml
 }
 
 
@@ -50,10 +61,10 @@ then
   testIsValid
   echo "Starting creation..."
   aws cloudformation create-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yaml" \
+  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://${WORKING_DIR}/output/params/${NAME}.json
+  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
 elif [[ *"${stackExists}"* != "IN_PROGRESS" ]]
 then
   echo "Updating the stack: ${NAME}"
@@ -61,10 +72,10 @@ then
   testIsValid
   echo "Starting update... "
   aws cloudformation update-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/export-${NAME}.yaml" \
+  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
-  --parameters file://${WORKING_DIR}/output/params/${NAME}.json
+  --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
 else
   echo "Work in progress, please try again later: ${stackExists}"
 fi
@@ -88,8 +99,8 @@ then
   aws cloudformation describe-stack-events --stack-name ${NAME} > logs/stack-events.log
   echo "Downloaded logs:"
   ls ./logs
-  echo "Deleting stack: ${NAME}"
-  aws cloudformation delete-stack --stack-name ${NAME}
+  #echo "Deleting stack: ${NAME}"
+  #aws cloudformation delete-stack --stack-name ${NAME}
 fi
 
 tidyUp

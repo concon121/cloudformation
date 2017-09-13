@@ -1,7 +1,7 @@
   <%= @id %>:
     Type: "AWS::S3::Bucket"
     Properties:
-      AccessControl: PublicReadWrite
+      AccessControl: Private
       BucketName: <%= @name %>
       VersioningConfiguration:
         Status: 'Enabled'
