@@ -31,17 +31,6 @@ Resources:
             name: '!Ref ProjectName',
             description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>
 
-  # ---------------------------------------------------------------------------
-  # S3 Static Website Bucket
-  # ---------------------------------------------------------------------------
-
-<%= partial('s3/www-bucket.yaml.erb',
-            id: appBucketId,
-            bucketName: appBucketName,
-            role: pipelineRoleId,
-            s3IpWhiteList: @ip_white_list) %>
-
-
 Outputs:
   GitRepo:
     Description: The name of the Git repository

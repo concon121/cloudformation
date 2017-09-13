@@ -98,12 +98,12 @@ Resources:
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
-#  OriginAccessIdentity:
-#    Type: 'AWS::CloudFormation::CustomResource'
-#    Properties:
-#      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
-#      Reference: !Ref ProjectName
-#      Comment: !Sub 'CloudFront origin access identity for ${ProjectName}'
+  OriginAccessIdentity:
+    Type: 'AWS::CloudFormation::CustomResource'
+    Properties:
+      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
+      Reference: !Ref ProjectName
+      Comment: !Sub 'CloudFront origin access identity for ${ProjectName}'
 <%= partial('cloudfront/cloudfront.yaml.erb',
            id: 'Production',
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],
