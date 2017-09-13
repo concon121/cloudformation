@@ -1,7 +1,11 @@
+@projectName = 'calculators'
+@appBucketName = "pr52-s3-#{@projectName}-hosting-${AWS::AccountId}-"
+@stagingBucket = "pr52-s3-#{@projectName}${ProjectName}-pipelinestaging-${AWS::AccountId}-"
+
 @tags = [
   {
     'key' => 'Owner',
-    'value' => 'Michael Last'
+    'value' => 'Connor Bray'
   },
   {
     'key' => 'Contact',
@@ -25,7 +29,7 @@
   },
   {
     'key' => 'ProjectCodePGDS',
-    'value' => 'TODO'
+    'value' => 'PRJ0021389'
   },
   {
     'key' => 'ProjectCodeBU',

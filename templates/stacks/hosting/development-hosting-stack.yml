@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Development stack for the Small Apps Domain'
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+    Default: <%= @projectName %>
+  IndexDocument:
+    Description: The index document for static S3 websites
+    Type: String
+    Default: index.html
+
+Mappings:
+<%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
+
+
+Resources:
+
+  # ---------------------------------------------------------------------------
+  # S3 Static Website Bucket
+  # ---------------------------------------------------------------------------
+
+<%
+  appBucketId = 'AppBucket'
+  appBucketName = @appBucketName + "dev"
+%>
+
+
+<%= partial('s3/www-bucket.yaml.erb',
+            id: appBucketId,
+            bucketName: appBucketName,
+            s3IpWhiteList: @ip_white_list) %>
+
+  # --------------------------------------------------------------------------
+  # Outputs
+  # --------------------------------------------------------------------------
+
+Outputs:
+  WebsiteUrl:
+    Description: The URL to connect to the website
+    Value: !GetAtt [<%= appBucketId %>, WebsiteURL]
+  AppBucketArn:
+    Description: The ARN of the S3 bucket which hosts the app
+    Value: !GetAtt [<%= appBucketId %>, Arn]

@@ -8,9 +8,7 @@
             Resource:
             <% if @s3s['names'] && !@s3s['names'].nil? %>
             <% @s3s['names'].each do |s3| %>
-              - !Sub
-                - 'arn:aws:s3:::${Bucket}/*'
-                - Bucket: <%= s3 %> <% end %>
+              - !Sub 'arn:aws:s3:::<%= s3 %>/*' <% end %>
             <% end %>
             <% if @s3s['arns'] && !@s3s['arns'].nil? %>
             <% @s3s['arns'].each do |s3| %>
@@ -24,9 +22,7 @@
             Resource:
             <% if @s3s['names'] && !@s3s['names'].nil? %>
             <% @s3s['names'].each do |s3| %>
-              - !Sub
-                - 'arn:aws:s3:::${Bucket}'
-                - Bucket: <%= s3 %> <% end %>
+              - !Sub 'arn:aws:s3:::<%= s3 %>' <% end %>
             <% end %>
             <% if @s3s['arns'] && !@s3s['arns'].nil? %>
             <% @s3s['arns'].each do |s3| %>

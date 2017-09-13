@@ -1,12 +1,11 @@
 <% appOutput = 'app-source' %>
-<% commonOutput = 'common-source' %>
 
   <%= @id %>:
     Type: "AWS::CodePipeline::Pipeline"
     DependsOn:
       - PipelineRole
     Properties:
-      Name: !Sub 'pr52-cp-${ProjectName}-pipeline-<%= @tag %>'
+      Name: !Sub 'pr52-cp-<%= @projectName %>${ProjectName}-pipeline-<%= @tag %>'
       RoleArn: !GetAtt [<%= @role %>, Arn]
       ArtifactStore:
         Location:
@@ -18,22 +17,8 @@
 <%= partial('codepipeline/stages/codecommit.yaml.erb',
             name: 'ApplicationSource',
             output: appOutput) %>
-<% if @commonRepo && !@commonRepo.nil? %>
-<%= partial('codepipeline/stages/codecommit.yaml.erb',
-            name: 'CommonSource',
-            repo: @commonRepo,
-            branch: @branch,
-            autotrigger: @autotrigger,
-            output: commonOutput) %>
-<% end %>
         - Name: 'Deployment'
           Actions:
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
             name: 'DeployApp',
             input: appOutput) %>
-<% if @commonRepo && !@commonRepo.nil? %>
-<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            name: 'DeployCommon',
-            input: commonOutput,
-            runOrder: 2) %>
-<% end %>

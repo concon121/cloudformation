@@ -1,11 +1,11 @@
   <%= @id %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Sub 'pr52-cb-${ProjectName}-deploy-<%= @tag %>'
+      Name: !Sub 'pr52-cb-<%= @projectName %>${ProjectName}-deploy-<%= @tag %>'
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "S3"
-        Location: !Join ['/', [<%= @source %>, 'app-source.zip']]
+        Location: !Join ['/', [!Sub '<%= @source %>', 'app-source.zip']]
 <%= partial(@buildSpec) %>
       Environment:
         Type: "container"

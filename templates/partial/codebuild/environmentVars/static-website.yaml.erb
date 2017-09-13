@@ -1,13 +1,10 @@
           - Name: "RELEASE_NAME"
             Value: "app-source.zip"
           - Name: "S3_BUCKET"
-            Value:
-              Ref: <%= @appBucket %>
+            Value: !Sub '<%= @appBucket %>'
           - Name: "STAGING_BUCKET"
             Value:
               Ref: <%= @stagingBucket %>
-          - Name: "ROOT_DIRECTORY"
-            Value: !Ref 'WebsiteRootDirectory'
           - Name: "CLOUDFRONT_DIST_ID"
           <% if @cloudfrontLogicalId && !@cloudfrontLogicalId.nil? %>
             Value:

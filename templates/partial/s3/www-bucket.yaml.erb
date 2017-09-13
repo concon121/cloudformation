@@ -2,11 +2,11 @@
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: PublicReadWrite
-      BucketName: <%= @bucketName %>
+      BucketName: !Sub '<%= @bucketName %>'
       VersioningConfiguration:
         Status: 'Enabled'
       WebsiteConfiguration:
-        IndexDocument: !Ref 'IndexDocument'
+        IndexDocument: 'index.html'
 
   <%= @id %>Policy:
     Type: AWS::S3::BucketPolicy
@@ -20,7 +20,7 @@
             Effect: 'Deny'
             Principal: '*'
             Action: 's3:GetObject'
-            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]
+            Resource: !Join ['', ['arn:aws:s3:::', !Sub '<%= @bucketName %>', '/*']]
             Condition:
               NotIpAddress:
                 aws:SourceIp: <% @s3IpWhiteList.each do |ip| %>
@@ -29,5 +29,5 @@
             Effect: Allow
             Principal: '*'
             Action: s3:GetObject
-            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]
+            Resource: !Join ['', ['arn:aws:s3:::', !Sub '<%= @bucketName %>', '/*']]
             <% end %>

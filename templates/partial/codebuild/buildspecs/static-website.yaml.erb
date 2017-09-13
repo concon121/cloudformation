@@ -3,10 +3,10 @@
           \n      - sudo apt-get install libfile-mimeinfo-perl zip unzip jq -y\
           \n      - if [ ! -z `aws s3api list-objects --bucket $STAGING_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $STAGING_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi \
           \n      - if [ -f ${RELEASE_NAME} ]; then unzip -n $RELEASE_NAME; fi\
-          \n      - aws s3 sync --acl public-read --sse AES256 --delete ${ROOT_DIRECTORY} s3://${S3_BUCKET}
+          \n      - aws s3 sync --acl public-read --sse AES256 --delete . s3://${S3_BUCKET}
 <% if @cloudfront && !@cloudfront.nil? %>
           \n      - aws configure set preview.cloudfront true\
           \n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"\
 <% end %>
-          \n      - zip -r ${RELEASE_NAME} ${ROOT_DIRECTORY} \
+          \n      - zip -r ${RELEASE_NAME} . \
           \n      - aws s3 cp ${RELEASE_NAME} s3://${STAGING_BUCKET} --acl public-read --sse AES256"

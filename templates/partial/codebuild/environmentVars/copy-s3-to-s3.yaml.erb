@@ -1,7 +1,5 @@
           - Name: "S3_DEST"
-            Value: <%= @dest %>
-          - Name: "ROOT_DIRECTORY"
-            Value: !Ref 'WebsiteRootDirectory'
+            Value: !Sub '<%= @dest %>'
           - Name: "CLOUDFRONT_DIST_ID"
           <% if @cloudfrontLogicalId && !@cloudfrontLogicalId.nil? %>
             Value:

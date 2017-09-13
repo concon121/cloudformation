@@ -10,13 +10,6 @@ Parameters:
     Description: The index document for static S3 websites
     Type: String
     Default: index.html
-  WebsiteRootDirectory:
-    Description: The directory in code commit containing the index file
-    Type: String
-    Default: '.'
-  CommonRepo:
-    Description: The name of the gir repository containing the common code
-    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -29,16 +22,16 @@ Resources:
   # ---------------------------------------------------------------------------
 
   <%
-    appBucketId = 'AppBucket'
-    appBucketName = "!Sub 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-dev'"
-    stagingBucket =  "!Sub 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-dev'"
+    appBucket = @appBucketName + "dev"
+    stagingBucket = @stagingBucket + "dev"
     codebuildsArry = [
       "ApplicationUploadBuild"
     ]
     s3Arry = {
-      'arns' => ['AppBucket', 'DevelopmentPipelineStagingBucket']
+      'names' => [@appBucketName + "dev"],
+      'arns' => ['DevelopmentPipelineStagingBucket']
     }
-    codecommits = ["ProjectName", "CommonRepo"]
+    codecommits = ["ProjectName"]
     pipelineRoleId = 'PipelineRole'
     pipelineId = 'DevelopmentPipeline'
     buildId = 'ApplicationUploadBuild'
@@ -60,19 +53,6 @@ Resources:
             name: '!Ref ProjectName',
             description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>
 
-
-  # ---------------------------------------------------------------------------
-  # S3 Static Website Bucket
-  # ---------------------------------------------------------------------------
-
-<%= partial('s3/www-bucket.yaml.erb',
-            id: appBucketId,
-            bucketName: appBucketName,
-            role: pipelineRoleId,
-            s3IpWhiteList: @ip_white_list) %>
-
-
-
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
   # ---------------------------------------------------------------------------
@@ -81,11 +61,10 @@ Resources:
             id: buildId,
             buildSpec: 'codebuild/buildspecs/static-website.yaml.erb',
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
-            appBucket: appBucketId,
             stagingBucket: stagingBucketId,
+            appBucket: appBucket,
             role: pipelineRoleId,
-            cloudfront: false,
-            commonRepo: true) %>
+            cloudfront: false) %>
 
   # ---------------------------------------------------------------------------
   # Pipeline definition
@@ -102,7 +81,6 @@ Resources:
             testing: false,
             branch: 'develop',
             repo: '!Ref ProjectName',
-            commonRepo: '!Ref CommonRepo',
             autotrigger: true,
             stagingBucket: stagingBucketId) %>
 
@@ -127,9 +105,6 @@ Resources:
   # --------------------------------------------------------------------------
 
 Outputs:
-  WebsiteUrl:
-    Description: The URL to connect to the website
-    Value: !GetAtt [AppBucket, WebsiteURL]
   CodeCommitPolicy:
     Description: The policy which allows access to CodeCommit
     Value:

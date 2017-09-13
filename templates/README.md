@@ -67,10 +67,6 @@ Environment variables for the buildspec of the same name.
 
 Environment variables for the buildspec of the same name.
 
-### Cloudformation Parameters
-
-- WebsiteRootDirectory - The directory in your repository where the website resources are located.
-
 ### Parameters
 
 - appBucket - The name of the S3 bucket which hosts the website.
