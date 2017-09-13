@@ -21,6 +21,9 @@ Parameters:
     Description: The directory in code commit containing the index file
     Type: String
     Default: '.'
+  CloudFrontOriginAccessIdentityResource:
+    Description: The ARN for the resource which creates cloudfront origin access identities
+    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -95,6 +98,12 @@ Resources:
   # CloudFront Configuration
   # ---------------------------------------------------------------------------
 
+#  OriginAccessIdentity:
+#    Type: 'AWS::CloudFormation::CustomResource'
+#    Properties:
+#      ServiceToken: !Ref CloudFrontOriginAccessIdentityResource
+#      Reference: !Ref ProjectName
+#      Comment: !Sub 'CloudFront origin access identity for ${ProjectName}'
 <%= partial('cloudfront/cloudfront.yaml.erb',
            id: 'Production',
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],

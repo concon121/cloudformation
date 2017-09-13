@@ -24,6 +24,9 @@ Parameters:
   CommonRepo:
     Description: The name of the gir repository containing the common code
     Type: String
+  CloudFrontOriginAccessIdentityResource:
+    Description: The ARN for the resource which creates cloudfront origin access identities
+    Type: String
 
 Mappings:
 <%= partial('mappings/environment-configuration.yaml.erb') %>
@@ -51,5 +54,6 @@ Resources:
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
                      {'key' => 'RootDomainZoneID', 'value' => '!Ref RootDomainZoneID'},
                      {'key' => 'RootDomain', 'value' => '!Ref RootDomain'},
-                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'}],
+                     {'key' => 'IndexDocument', 'value' => '!Ref IndexDocument'},
+                     {'key' => 'CloudFrontOriginAccessIdentityResource', 'value' => '!Ref CloudFrontOriginAccessIdentityResource'}],
             tags: @prodTags) %>

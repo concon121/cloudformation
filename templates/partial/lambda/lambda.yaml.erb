@@ -3,9 +3,11 @@
     Properties:
       Code:
         S3Bucket: <%= @bucket %>
-        S3Key: <%= @key %>
+        S3Key: <%= @key %><% if @lambda_version && !@lambda_version.nil? %>
+        S3ObjectVersion: <%= @lambda_version %><% end %>
       Description: <%= @description %>
       FunctionName: !Sub pr52-lam-${ProjectName}-<%= @name %>-<%= @tag %>
       Handler: <%= @handler %>
       Role: <%= @role %>
       Runtime: <%= @runtime %>
+      Timeout: 300

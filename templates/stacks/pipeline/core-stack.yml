@@ -30,26 +30,16 @@ Resources:
             id: 'SharedResourcesRepo',
             name: '!Ref ProjectName',
             description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>
-<%= partial('iam/service-role.yaml.erb',
-            id: 'LambdaServiceRole',
-            name: 'cloudfrontoriginaccessidentity',
-            services: ['lambda'],
-            policies: ['iam/policies/actions/cloudfront-create-origin-access-identity.yaml.erb',
-                       'iam/policies/actions/s3.yaml.erb',
-                       'iam/policies/actions/logs.yaml.erb'],
-            s3s: {
-              'names' => ['pgds-cross-account-access']
-              },
-            serviceName: "pr52-lam-${ProjectName}-createoriginaccessidentity-#{@tag}") %>
-<%= partial('lambda/lambda.yaml.erb',
-            id: 'CloudFrontOriginAccessIdentityLambda',
-            name: 'createoriginaccessidentity',
-            description: 'Creates an origin access identity in CloudFront',
-            handler: 'lambda_function.lambda_handler',
-            role: '!GetAtt [LambdaServiceRole, Arn]',
-            runtime: 'python3.6',
-            bucket: 'pgds-cross-account-access',
-            key: 'SmallAppsDomain/lambda-source/pr52-lam-sad-cloudfrontoriginaccessidentity.zip') %>
+
+  # ---------------------------------------------------------------------------
+  # S3 Static Website Bucket
+  # ---------------------------------------------------------------------------
+
+<%= partial('s3/www-bucket.yaml.erb',
+            id: appBucketId,
+            bucketName: appBucketName,
+            role: pipelineRoleId,
+            s3IpWhiteList: @ip_white_list) %>
 
 
 Outputs:
@@ -69,10 +59,3 @@ Outputs:
   DomainName:
     Description: The newly created domain name
     Value: !Join [., [!Ref SubDomain, !Ref RootDomain]]
-  CloudFrontOriginAccessIdentityLambda:
-    Description: The resource name of the lambda which creates origin access identities in CloudFront
-    Value:
-      Ref: CloudFrontOriginAccessIdentityLambda
-  CloudFrontOriginAccessIdentityLambdaArn:
-    Description: The ARN of the lambda which creates origin access identities in CloudFront
-    Value: !GetAtt [CloudFrontOriginAccessIdentityLambda, Arn]

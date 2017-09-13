@@ -14,31 +14,27 @@ cd $WORKING_DIR
 
 #LONO_ENV=dev lono generate
 #LONO_ENV=test lono generate
-LONO_ENV=prod lono generate
 
 stackExists=`aws cloudformation list-stacks | jq -r "[.StackSummaries[] | select(.StackName == \"${NAME}\")] | .[0].StackStatus"`
 
 function setUp() {
-  echo "Packaging cloudformation template..."
-  #aws cloudformation package --template-file output/small-apps-domain.yml  --s3-bucket ${S3_BUCKET} --s3-prefix 'SmallAppsDomain'
-  #for file in `find output -type f | grep ".yml"`
-  #do
-  #  echo $file
-
-  #done
-
-  echo "Uploading nested stacks to ${S3_BUCKET}"
-  aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive
 
   echo "Uploading lambda zip for ${S3_BUCKET}"
   mkdir -p lambdas/cloudfront-origin-access-identity/lib
-  pip install -r lambdas/cloudfront-origin-access-identity/requirements.txt -t lambdas/cloudfront-origin-access-identity/lib --upgrade
-  cd lambdas/cloudfront-origin-access-identity && zip ../pr52-lam-sad-cloudfrontoriginaccessidentity.zip * && cd ../..
+  pip install -r lambdas/cloudfront-origin-access-identity/requirements.txt -t lambdas/cloudfront-origin-access-identity --upgrade
+  cd lambdas/cloudfront-origin-access-identity && zip -r ../pr52-lam-sad-cloudfrontoriginaccessidentity.zip * && cd ../..
 
   aws s3 cp "lambdas/pr52-lam-sad-cloudfrontoriginaccessidentity.zip" "s3://${S3_BUCKET}/SmallAppsDomain/lambda-source/"
+  version=`aws s3api list-object-versions --bucket pgds-cross-account-access --prefix 'SmallAppsDomain/lambda-source/pr52-lam-sad-cloudfrontoriginaccessidentity.zip' | jq -r .Versions[0].VersionId`
+  export LAMBDA_VERSION=$version
+  echo "The lambda version is: $LAMBDA_VERSION"
 
-  #echo "Uploading template to S3 bucket..."
-  #aws s3 cp SmallAppsDomain/${NAME}.yml "s3://${S3_BUCKET}/SmallAppsDomain/${NAME}.yml"
+  echo "Packaging cloudformation template..."
+  LONO_ENV=prod lono generate
+
+  echo "Uploading nested stacks to ${S3_BUCKET}"
+  aws s3 cp "output" "s3://${S3_BUCKET}/SmallAppsDomain/" --recursive
+  
 }
 
 function testIsValid() {
@@ -49,6 +45,8 @@ function testIsValid() {
   then
     exit 1
   fi
+
+  sleep 5
 }
 
 function tidyUp() {
@@ -101,8 +99,8 @@ then
   aws cloudformation describe-stack-events --stack-name ${NAME} > logs/stack-events.log
   echo "Downloaded logs:"
   ls ./logs
-  echo "Deleting stack: ${NAME}"
-  aws cloudformation delete-stack --stack-name ${NAME}
+  #echo "Deleting stack: ${NAME}"
+  #aws cloudformation delete-stack --stack-name ${NAME}
 fi
 
 tidyUp

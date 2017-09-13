@@ -19,6 +19,11 @@ common_repo = {
   'value' => 'calculators-shared'
 }
 
+origin_access_identity = {
+  'key' => 'CloudFrontOriginAccessIdentityResource',
+  'value' => '!Ref CloudFrontOriginAccessIdentityResource'
+}
+
 shared = {
   'id' => 'SharedResources',
   'key' => 'stacks/pipeline/core-stack',
@@ -39,7 +44,7 @@ shared = {
 suf = {
   'id' => 'SUF',
   'key' => 'stacks/small-apps-project-stack',
-  'params' => [root_domain, root_zone, common_repo, {
+  'params' => [root_domain, root_zone, common_repo, origin_access_identity, {
     'key' => 'ProjectName',
     'value' => 'suf'
   }]
@@ -58,4 +63,8 @@ template 'small-apps-domain' do
       codecommitPolicy: true
     }
   )
+end
+
+template 'origin-access-identity' do
+  source 'origin-access-identity'
 end
