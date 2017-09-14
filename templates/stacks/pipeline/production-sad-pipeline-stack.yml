@@ -23,10 +23,8 @@ Resources:
       "ApplicationUploadBuild"
     ]
     s3Arry = {
-      'arns' => ['AppBucket'],
-      'names' => [testAppBucketName]
+      'names' => [appBucketName, testAppBucketName]
     }
-    codecommits = ["ProjectName"]
     pipelineRoleId = 'PipelineRole'
     pipelineId = 'ProductionPipeline'
     buildId = 'ApplicationUploadBuild'

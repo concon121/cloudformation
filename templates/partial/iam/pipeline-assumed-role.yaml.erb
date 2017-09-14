@@ -2,7 +2,7 @@
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
-      RoleName: !Sub 'pr-iam-<%= @projectName %>${ProjectName}-pipelineassumedrole-<%= @tag %>'
+      RoleName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrole-<%= @tag %>'
       AssumeRolePolicyDocument:
         Version: "2008-10-17"
         Statement:

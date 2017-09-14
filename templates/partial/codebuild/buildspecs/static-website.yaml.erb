@@ -9,4 +9,4 @@
           \n      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"\
 <% end %>
           \n      - zip -r ${RELEASE_NAME} . \
-          \n      - aws s3 cp ${RELEASE_NAME} s3://${STAGING_BUCKET} --acl public-read --sse AES256"
+          \n      - aws s3 cp ${RELEASE_NAME} s3://${S3_BUCKET} --acl public-read --sse AES256"

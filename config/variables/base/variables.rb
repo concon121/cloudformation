@@ -1,6 +1,6 @@
-@projectName = 'calculators'
-@appBucketName = "pr52-s3-#{@projectName}-hosting-${AWS::AccountId}-"
-@stagingBucket = "pr52-s3-#{@projectName}${ProjectName}-pipelinestaging-${AWS::AccountId}-"
+@projectName = 'sad'
+@appBucketName = 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-'
+@stagingBucket = 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-'
 
 @tags = [
   {

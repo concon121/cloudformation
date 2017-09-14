@@ -31,7 +31,10 @@ Resources:
       'names' => [@appBucketName + "dev"],
       'arns' => ['DevelopmentPipelineStagingBucket']
     }
-    codecommits = ["ProjectName"]
+    codecommits = []
+    @projects.each do |project|
+      codecommits.push(project['id'] + 'Repo.Name')
+    end
     pipelineRoleId = 'PipelineRole'
     pipelineId = 'DevelopmentPipeline'
     buildId = 'ApplicationUploadBuild'
@@ -47,12 +50,12 @@ Resources:
   # --------------------------------------------------------------------------
   # CodeCommit Repository
   # --------------------------------------------------------------------------
-
+<% @projects.each do |project| %>
 <%= partial('codecommit/repository.yaml.erb',
-            id: 'DevelopmentRepo',
-            name: '!Ref ProjectName',
-            description: "!Join [' ' , ['Git repository for:', !Ref ProjectName]]") %>
-
+            id: project['id'] + 'Repo',
+            name: project['name'],
+            description: "!Join [' ' , ['Git repository for:', #{project['name']}]]") %>
+<% end %>
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
   # ---------------------------------------------------------------------------
@@ -80,7 +83,6 @@ Resources:
             buildName: buildId,
             testing: false,
             branch: 'develop',
-            repo: '!Ref ProjectName',
             autotrigger: true,
             stagingBucket: stagingBucketId) %>
 
@@ -117,12 +119,14 @@ Outputs:
     Description: The policy which allows access to CodePipeline
     Value:
       Ref: 'CodePipelineAccessPolicy'
-  GitRepo:
+<% @projects.each do |project| %>
+  <%= project['id'] %>GitRepo:
     Description: The name of the Git repository
-    Value: !GetAtt [DevelopmentRepo, Name]
-  GitRepoCloneUrlHttp:
+    Value: !GetAtt [<%= project['id'] %>Repo, Name]
+  <%= project['id'] %>GitRepoCloneUrlHttp:
     Description: The URL to clone the Git repository via HTTP
-    Value: !GetAtt [DevelopmentRepo, CloneUrlHttp]
-  GitRepoCloneUrlSsh:
+    Value: !GetAtt [<%= project['id'] %>Repo, CloneUrlHttp]
+  <%= project['id'] %>GitRepoCloneUrlSsh:
     Description: The URL to clone the Git repository via SSH
-    Value: !GetAtt [DevelopmentRepo, CloneUrlSsh]
+    Value: !GetAtt [<%= project['id'] %>Repo, CloneUrlSsh]
+<% end %>

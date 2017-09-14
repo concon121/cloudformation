@@ -30,7 +30,10 @@ Resources:
         'names' => [@appBucketName + "test"],
         'arns' => ['TestPipelineStagingBucket']
     }
-    codecommits = ["ProjectName"]
+    codecommitNames = []
+    @projects.each do |project|
+      codecommitNames.push(project['name'])
+    end
     pipelineRoleId = 'PipelineRole'
     pipelineId = 'TestPipeline'
     buildId = 'ApplicationUploadBuild'
@@ -41,7 +44,7 @@ Resources:
             id: pipelineRoleId,
             codebuilds: codebuildsArry,
             s3s: s3Arry,
-            codecommits: codecommits) %>
+            codecommitNames: codecommitNames) %>
 
   # ---------------------------------------------------------------------------
   # CodeBuild configuration
@@ -70,7 +73,6 @@ Resources:
             buildName: buildId,
             testing: true,
             branch: 'master',
-            repo: '!Ref ProjectName',
             autotrigger: false,
             stagingBucket: stagingBucketId) %>
 

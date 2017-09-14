@@ -72,22 +72,9 @@ prod_hosting = {
   }, root_zone, origin_access_identity]
 }
 
-shared = {
-  'id' => 'Shared',
-  'key' => 'stacks/small-apps-project-stack',
-  'params' => [{
-    'key' => 'ProjectName',
-    'value' => 'shared'
-  }]
-}
-
-suf = {
-  'id' => 'SUF',
-  'key' => 'stacks/small-apps-project-stack',
-  'params' => [{
-    'key' => 'ProjectName',
-    'value' => 'suf'
-  }]
+small_apps = {
+  'id' => 'SmallApps',
+  'key' => 'stacks/small-apps-project-stack'
 }
 
 # ============================================================================
@@ -97,7 +84,8 @@ suf = {
 template 'small-apps-domain' do
   source 'small-apps-domain'
   variables(
-    'stacks' => [dev_hosting, test_hosting, shared, suf]
+    'stacks' => [dev_hosting, test_hosting, small_apps]
+
   )
 end
 

@@ -5,7 +5,7 @@
     DependsOn:
       - PipelineRole
     Properties:
-      Name: !Sub 'pr52-cp-<%= @projectName %>${ProjectName}-pipeline-<%= @tag %>'
+      Name: !Sub 'pr52-cp-${ProjectName}-pipeline-<%= @tag %>'
       RoleArn: !GetAtt [<%= @role %>, Arn]
       ArtifactStore:
         Location:
@@ -13,12 +13,13 @@
         Type: "S3"
       Stages:
         - Name: "Source"
-          Actions:
+          Actions:<% @projects.each do |project| %>
 <%= partial('codepipeline/stages/codecommit.yaml.erb',
-            name: 'ApplicationSource',
-            output: appOutput) %>
+            name: project['id'] + 'Source',
+            repo: project['name'],
+            output: project['id'] + 'Output') %><% end %>
         - Name: 'Deployment'
-          Actions:
+          Actions:<% @projects.each do |project| %>
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            name: 'DeployApp',
-            input: appOutput) %>
+            name: 'Deploy' + project['id'],
+            input: project['id'] + 'Output') %><% end %>

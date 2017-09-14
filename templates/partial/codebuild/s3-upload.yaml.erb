@@ -1,7 +1,7 @@
   <%= @id %>:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Sub 'pr52-cb-<%= @projectName %>${ProjectName}-deploy-<%= @tag %>'
+      Name: !Sub 'pr52-cb-${ProjectName}-deploy-<%= @tag %>'
       Description: "Upload resources to an S3 bucket"
       Source:
         Type: "CODEPIPELINE"
