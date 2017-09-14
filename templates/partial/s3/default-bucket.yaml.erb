@@ -2,4 +2,4 @@
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: PublicReadWrite
-      BucketName: <%= @name %>
+      BucketName: !Sub '<%= @name %>'

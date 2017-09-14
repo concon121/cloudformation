@@ -10,4 +10,4 @@
             Principal:
               CanonicalUser: <%= @canonicalUser %>
             Action: 's3:GetObject'
-            Resource: !Join ['', ['arn:aws:s3:::', <%= @bucketName %>, '/*']]
+            Resource: !Join ['', ['arn:aws:s3:::', !Sub '<%= @bucketName %>', '/*']]

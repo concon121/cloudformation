@@ -2,6 +2,6 @@
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: Private
-      BucketName: <%= @name %>
+      BucketName: !Sub '<%= @name %>'
       VersioningConfiguration:
         Status: 'Enabled'

@@ -1,6 +1,5 @@
 <% appOutput = 'app-source' %>
-<% commonOutput = 'common-source' %>
-
+<% buildOrder = 1 %>
   <%= @id %>:
     Type: "AWS::CodePipeline::Pipeline"
     DependsOn:
@@ -8,32 +7,23 @@
     Properties:
       Name: !Sub 'pr52-cp-${ProjectName}-pipeline-<%= @tag %>'
       RoleArn: !GetAtt [<%= @role %>, Arn]
+      RestartExecutionOnUpdate: false
       ArtifactStore:
         Location:
           Ref: <%= @stagingBucket %>
         Type: "S3"
       Stages:
         - Name: "Source"
-          Actions:
+          Actions:<% @projects.each do |project| %>
 <%= partial('codepipeline/stages/codecommit.yaml.erb',
-            name: 'ApplicationSource',
-            output: appOutput) %>
-<% if @commonRepo && !@commonRepo.nil? %>
-<%= partial('codepipeline/stages/codecommit.yaml.erb',
-            name: 'CommonSource',
-            repo: @commonRepo,
-            branch: @branch,
-            autotrigger: @autotrigger,
-            output: commonOutput) %>
-<% end %>
+            name: project['id'] + 'Source',
+            repo: project['name'],
+            output: project['id'] + 'Output') %><% end %>
         - Name: 'Deployment'
-          Actions:
+          Actions:<% @projects.each do |project| %>
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            name: 'DeployApp',
-            input: appOutput) %>
-<% if @commonRepo && !@commonRepo.nil? %>
-<%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
-            name: 'DeployCommon',
-            input: commonOutput,
-            runOrder: 2) %>
+            name: 'Deploy' + project['id'],
+            input: project['id'] + 'Output',
+            runOrder: buildOrder) %>
+<% buildOrder += 1 %>
 <% end %>
