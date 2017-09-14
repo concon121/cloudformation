@@ -8,7 +8,7 @@
           Ref: <%= @webAcl %>
         <% end %>
         Origins:
-        - DomainName: !Join ['.', ['www', !Ref 'ProjectName', !Ref 'RootDomain', s3, amazonaws, com]]
+        - DomainName: !Join ['.', ['<%= @bucketName %>', s3, amazonaws, com]]
           Id: S3Origin<% if @originAccessIdentity %>
           S3OriginConfig:
             OriginAccessIdentity: !Join ['/', ['origin-access-identity', 'cloudfront', <%= @originAccessIdentity %>]]
@@ -43,7 +43,7 @@
       - <%= dependency %> <% end %>
     <% end %>
     Properties:
-      HostedZoneName: !Join ['.', [!Ref 'ProjectName', !Ref 'RootDomain', '']]
+      HostedZoneName: <%= @hostedZone %>
       Comment: Zone apex alias.
       RecordSets:
         - Name: !Sub

@@ -87,6 +87,8 @@ Resources:
            id: 'Production',
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],
            webAcl: 'ProductionWebAcl',
+           bucketName: appBucketName,
+           hostedZone: "!Join ['.', [!Ref 'ProjectName', !Ref 'RootDomain', '']]",
            originAccessIdentity: '!GetAtt [OriginAccessIdentity, Id]') %>
 
 
@@ -103,3 +105,9 @@ Outputs:
   AppBucketArn:
     Description: The ARN of the S3 bucket which hosts the app
     Value: !GetAtt [<%= appBucketId %>, Arn]
+<% if @enableDNS %>
+  CloudFrontId:
+    Description: The ID of the CloudFront distribution
+    Value:
+      Ref: ProductionCloudfront
+<% end %>

@@ -6,6 +6,9 @@ Parameters:
   ProjectName:
     Description: The name of the project
     Type: String
+  CloudFrontId:
+    Description: The ID of the CloudFront distribution
+    Type: String
 
 Mappings:
 <%= partial('mappings/region-map.yaml.erb', {}, indent: 2) %>
@@ -44,7 +47,7 @@ Resources:
             buildSpec: 'codebuild/buildspecs/copy-s3-to-s3.yaml.erb',
             environmentVars: 'codebuild/environmentVars/copy-s3-to-s3.yaml.erb',
             cloudfront: true,
-            cloudfrontLogicalId: 'ProductionCloudfront',
+            cloudfrontLogicalId: '!Ref CloudFrontId',
             role: pipelineRoleId,
             source: testAppBucketName,
             dest: appBucketName) %>

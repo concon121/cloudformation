@@ -34,6 +34,9 @@ end
 
 template 'prod/stacks/hosting/production-hosting-stack' do
   source 'stacks/hosting/production-hosting-stack'
+  variables(
+    'enableDNS' => true
+  )
 end
 
 shared = {
@@ -74,7 +77,11 @@ prod_hosting = {
 
 small_apps = {
   'id' => 'SmallApps',
-  'key' => 'stacks/small-apps-project-stack'
+  'key' => 'stacks/small-apps-project-stack',
+  'params' => [{
+    'key' => 'CloudFrontId',
+    'value' => '!GetAtt [ProductionHosting, Outputs.CloudFrontId]'
+  }]
 }
 
 # ============================================================================
@@ -84,7 +91,7 @@ small_apps = {
 template 'small-apps-domain' do
   source 'small-apps-domain'
   variables(
-    'stacks' => [dev_hosting, test_hosting, small_apps]
+    'stacks' => [dev_hosting, test_hosting, prod_hosting, small_apps]
 
   )
 end

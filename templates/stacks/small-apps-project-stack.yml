@@ -7,6 +7,9 @@ Parameters:
     Description: The name of the project
     Type: String
     Default: <%= @projectName %>
+  CloudFrontId:
+    Description: The ID of the CloudFront distribution
+    Type: String
 
 Mappings:
 <%= partial('mappings/environment-configuration.yaml.erb') %>
@@ -22,8 +25,9 @@ Resources:
             url: template_s3_path("stacks/pipeline/test-sad-pipeline"),
             params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'}],
             tags: @testTags) %>
-<%# partial('cloudformation/stack.yaml.erb',
-  #          id: "ProductionStack",
-  #          url: template_s3_path("stacks/pipeline/production-sad-pipeline"),
-  #          params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'}],
-  #          tags: @prodTags) %>
+<%= partial('cloudformation/stack.yaml.erb',
+            id: "ProductionStack",
+            url: template_s3_path("stacks/pipeline/production-sad-pipeline"),
+            params: [{'key' => 'ProjectName', 'value' => '!Ref ProjectName'},
+                     {'key' => 'CloudFrontId', 'value' => '!Ref CloudFrontId' }],
+            tags: @prodTags) %>
