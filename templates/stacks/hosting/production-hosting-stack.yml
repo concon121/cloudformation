@@ -87,7 +87,7 @@ Resources:
            id: 'Production',
            dependsOn: ['ProductionZone', 'ProductionWebAcl'],
            webAcl: 'ProductionWebAcl',
-           bucketName: appBucketName,
+           bucketName: "!Sub '#{appBucketName}'",
            hostedZone: "!Join ['.', [!Ref 'ProjectName', !Ref 'RootDomain', '']]",
            originAccessIdentity: '!GetAtt [OriginAccessIdentity, Id]') %>
 

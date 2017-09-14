@@ -17,5 +17,5 @@
           \n      - if [ $sameCommit -ne 1 ]; then aws configure set preview.cloudfront true; fi\
           \n      - if [ $sameCommit -ne 1 ]; then aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"; fi\
 <% end %>
-          \n      - if [ $sameCommit -ne 1 ]; then zip -r ${RELEASE_NAME} .; fi\
+          \n      - if [ $sameCommit -ne 1 ]; then mkdir -p xpf_calculators; mv $PROJECT_NAME xpf_calculators/; zip -r ${RELEASE_NAME} xpf_calculators; fi\
           \n      - if [ $sameCommit -ne 1 ]; then aws s3 cp ${RELEASE_NAME} s3://${STAGING_BUCKET} --acl public-read --sse AES256; fi"

@@ -8,7 +8,7 @@
           Ref: <%= @webAcl %>
         <% end %>
         Origins:
-        - DomainName: !Join ['.', ['<%= @bucketName %>', s3, amazonaws, com]]
+        - DomainName: !Join ['.', [<%= @bucketName %>, s3, amazonaws, com]]
           Id: S3Origin<% if @originAccessIdentity %>
           S3OriginConfig:
             OriginAccessIdentity: !Join ['/', ['origin-access-identity', 'cloudfront', <%= @originAccessIdentity %>]]
