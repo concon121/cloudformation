@@ -9,13 +9,13 @@
           \n      - sameCommit=`cat ${PROJECT_NAME}.lastcommit | grep $commit | wc -l`
           \n      - echo $sameCommit
           \n      - if [ $sameCommit -eq 1 ] && [ ! -z `cat ${PROJECT_NAME}.lastcommit` ]; then echo \"Commit ID ${commit} is already deployed.  Exiting without re-deployment.\"; exit 0; else echo $commit > ${PROJECT_NAME}.lastcommit; aws s3 cp ${PROJECT_NAME}.lastcommit s3://${STAGING_BUCKET} --acl public-read --sse AES256; fi
-          \n      - 'if [ $sameCommit -ne 1 ]; then aws s3 rm --recursive s3://${S3_BUCKET}/xpf_calculators/${PROJECT_NAME} || :; fi'\
-          \n      - if [ $sameCommit -ne 1 ]; then aws s3 sync --acl public-read --sse AES256  ${PROJECT_NAME} s3://${S3_BUCKET}/xpf_calculators/${PROJECT_NAME}; fi \
+          \n      - 'if [ $sameCommit -ne 1 ]; then aws s3 rm --recursive s3://${S3_BUCKET}/<%= @projectRoot %>/${PROJECT_NAME} || :; fi'\
+          \n      - if [ $sameCommit -ne 1 ]; then aws s3 sync --acl public-read --sse AES256  ${PROJECT_NAME} s3://${S3_BUCKET}/<%= @projectRoot %>/${PROJECT_NAME}; fi \
           \n      - if [ $sameCommit -ne 1 ]; then if [ ! -z `aws s3api list-objects --bucket $STAGING_BUCKET | jq -r '.Contents[].Key' | grep $RELEASE_NAME || :` ]; then aws s3api get-object --bucket $STAGING_BUCKET --key $RELEASE_NAME $RELEASE_NAME; fi; fi \
           \n      - if [ $sameCommit -ne 1 ]; then if [ -f ${RELEASE_NAME} ]; then unzip -n $RELEASE_NAME; fi; fi\
 <% if @cloudfront && !@cloudfront.nil? %>
           \n      - if [ $sameCommit -ne 1 ]; then aws configure set preview.cloudfront true; fi\
           \n      - if [ $sameCommit -ne 1 ]; then aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\"; fi\
 <% end %>
-          \n      - if [ $sameCommit -ne 1 ]; then mkdir -p xpf_calculators; mv $PROJECT_NAME xpf_calculators/; zip -r ${RELEASE_NAME} xpf_calculators; fi\
+          \n      - if [ $sameCommit -ne 1 ]; then mkdir -p <%= @projectRoot %>; mv $PROJECT_NAME <%= @projectRoot %>/; zip -r ${RELEASE_NAME} <%= @projectRoot %>; fi\
           \n      - if [ $sameCommit -ne 1 ]; then aws s3 cp ${RELEASE_NAME} s3://${STAGING_BUCKET} --acl public-read --sse AES256; fi"

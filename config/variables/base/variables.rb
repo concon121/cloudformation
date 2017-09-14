@@ -1,4 +1,5 @@
 @projectName = 'sad'
+@projectRoot = 'xpf_calculators'
 @appBucketName = 'pr52-s3-${ProjectName}-hosting-${AWS::AccountId}-'
 @stagingBucket = 'pr52-s3-${ProjectName}-pipelinestaging-${AWS::AccountId}-'
 
