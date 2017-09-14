@@ -1,5 +1,5 @@
 <% appOutput = 'app-source' %>
-
+<% buildOrder = 1 %>
   <%= @id %>:
     Type: "AWS::CodePipeline::Pipeline"
     DependsOn:
@@ -7,6 +7,7 @@
     Properties:
       Name: !Sub 'pr52-cp-${ProjectName}-pipeline-<%= @tag %>'
       RoleArn: !GetAtt [<%= @role %>, Arn]
+      RestartExecutionOnUpdate: false
       ArtifactStore:
         Location:
           Ref: <%= @stagingBucket %>
@@ -22,4 +23,7 @@
           Actions:<% @projects.each do |project| %>
 <%= partial('codepipeline/stages/s3-upload-codebuild.yaml.erb',
             name: 'Deploy' + project['id'],
-            input: project['id'] + 'Output') %><% end %>
+            input: project['id'] + 'Output',
+            runOrder: buildOrder) %>
+<% buildOrder += 1 %>
+<% end %>

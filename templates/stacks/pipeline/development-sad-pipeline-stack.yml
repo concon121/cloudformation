@@ -66,6 +66,7 @@ Resources:
             environmentVars: 'codebuild/environmentVars/static-website.yaml.erb',
             stagingBucket: stagingBucketId,
             appBucket: appBucket,
+            branch: 'develop',
             role: pipelineRoleId,
             cloudfront: false) %>
 
