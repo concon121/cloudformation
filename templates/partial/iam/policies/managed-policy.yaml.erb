@@ -1,7 +1,7 @@
   <%= @id %>:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:
-      ManagedPolicyName: !Sub 'pr-iam-${ProjectName}-<%= @name %>-accesspolicy-<%= @tag %>'
+      ManagedPolicyName: !Sub '${ProjectName}-<%= @name %>-accesspolicy-<%= @tag %>'
       <% if @roles && !@roles.nil? %>
       Roles: <% @roles.each do |role| %>
         - <%= @role %> <% end %>

@@ -2,7 +2,7 @@
   <%= @id %>:
     Type: "AWS::WAF::WebACL"
     Properties:
-      Name: !Sub 'pr-wafacl-${ProjectName}-accesscontrol-<%= @tag %>'
+      Name: !Sub '${ProjectName}-accesscontrol-<%= @tag %>'
       DefaultAction:
         Type: "ALLOW"
       MetricName: <%= @name %>

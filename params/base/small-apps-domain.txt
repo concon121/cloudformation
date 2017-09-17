@@ -1,3 +1,0 @@
-RootDomainZoneID=Z3P3H2NORORNMS
-RootDomain=spacegoats.co.uk
-CloudFrontOriginAccessIdentityResource=arn:aws:lambda:eu-west-1:977855701381:function:pr52-lam-common-createoriginaccessidentity-prod

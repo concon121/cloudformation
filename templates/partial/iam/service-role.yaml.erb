@@ -2,7 +2,7 @@
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
-      RoleName: !Sub 'pr-iam-${ProjectName}-<%= @name %>-<%= @tag %>'
+      RoleName: !Sub '${ProjectName}-<%= @name %>-<%= @tag %>'
       AssumeRolePolicyDocument:
         Version: "2008-10-17"
         Statement:<% @services.each do |service| %>
@@ -15,7 +15,7 @@
   <%= @roleId %>Policy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
+      PolicyName: !Sub '${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
       Roles:
         - Ref: <%= @id %>
       PolicyDocument:

@@ -25,7 +25,10 @@ function setUp() {
 
 function testIsValid() {
   echo "Testing the template is valid..."
-  aws cloudformation validate-template --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" 1> /dev/null
+  #https://cbscl-s3-cloudformation-538162597997.s3-eu-west-1.amazonaws.com/origin-access-identity.yml
+  #https://cbscl-s3-cloudformation-538162597997.s3-eu-west-1.amazonaws.com/origin-access-identity.yml
+  echo  "https://${CLOUDFORMATION_BUCKET}.s3-eu-west-1.amazonaws.com/${NAME}.yml"
+  #aws cloudformation validate-template --template-url "https://${CLOUDFORMATION_BUCKET}.s3-eu-west-1.amazonaws.com/${NAME}.yml" 1> /dev/null
 
   if [[ $? -gt 0 ]]
   then
@@ -47,7 +50,7 @@ then
   testIsValid
   echo "Starting creation..."
   aws cloudformation create-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
+  --template-url "https://${CLOUDFORMATION_BUCKET}.s3-eu-west-1.amazonaws.com/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
   --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json
@@ -58,7 +61,7 @@ then
   testIsValid
   echo "Starting update... "
   aws cloudformation update-stack \
-  --template-url "https://s3-${REGION}.amazonaws.com/${S3_BUCKET}/SmallAppsDomain/${NAME}.yml" \
+  --template-url "https://${CLOUDFORMATION_BUCKET}.s3-eu-west-1.amazonaws.com/${NAME}.yml" \
   --stack-name ${NAME} \
   --capabilities "CAPABILITY_NAMED_IAM" \
   --parameters file://${WORKING_DIR}/output/params/prod/${NAME}.json

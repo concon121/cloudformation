@@ -10,7 +10,7 @@
     Type: "AWS::WAF::Rule"
     Properties:
       MetricName: !Join ['', [!Ref ProjectName, <%= @name %>, <%= @tag %>]]
-      Name: !Sub 'pr-wafr-${ProjectName}-<%= @name %>-${AWS::AccountId}-prod'
+      Name: !Sub '${ProjectName}-<%= @name %>-${AWS::AccountId}-prod'
       Predicates: <% @predicates.each do |predicate| %>
         - DataId:
             Ref: <%= predicate['id'] %>

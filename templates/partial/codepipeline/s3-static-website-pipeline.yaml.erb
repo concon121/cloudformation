@@ -5,7 +5,7 @@
     DependsOn:
       - PipelineRole
     Properties:
-      Name: !Sub 'pr52-cp-${ProjectName}-pipeline-<%= @tag %>'
+      Name: !Sub '${ProjectName}-pipeline-<%= @tag %>'
       RoleArn: !GetAtt [<%= @role %>, Arn]
       RestartExecutionOnUpdate: false
       ArtifactStore:

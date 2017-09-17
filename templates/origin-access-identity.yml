@@ -14,19 +14,19 @@ Resources:
                        'iam/policies/actions/s3.yaml.erb',
                        'iam/policies/actions/logs.yaml.erb'],
             s3s: {
-              'names' => ['pgds-cross-account-access']
+              'names' => [@lambda_bucket]
               },
-            serviceName: "pr52-lam-${ProjectName}-createoriginaccessidentity-#{@tag}") %>
+            serviceName: "create-origin-access-identity") %>
 
 <%= partial('lambda/lambda.yaml.erb',
             id: 'CloudFrontOriginAccessIdentityLambda',
-            name: 'createoriginaccessidentity',
+            name: 'create-origin-access-identity',
             description: 'Creates an origin access identity in CloudFront',
             handler: 'lambda_function.lambda_handler',
             role: '!GetAtt [LambdaServiceRole, Arn]',
             runtime: 'python2.7',
-            bucket: 'pgds-cross-account-access',
-            key: 'SmallAppsDomain/lambda-source/pr52-lam-sad-cloudfrontoriginaccessidentity.zip') %>
+            bucket: @lambda_bucket,
+            key: 'origin-access-identity.zip') %>
 
 Outputs:
   CloudFrontOriginAccessIdentityLambda:

@@ -6,7 +6,7 @@
         S3Key: <%= @key %><% if @lambda_version && !@lambda_version.nil? %>
         S3ObjectVersion: <%= @lambda_version %><% end %>
       Description: <%= @description %>
-      FunctionName: !Sub pr52-lam-${ProjectName}-<%= @name %>-<%= @tag %>
+      FunctionName: !Sub ${ProjectName}-<%= @name %>
       Handler: <%= @handler %>
       Role: <%= @role %>
       Runtime: <%= @runtime %>

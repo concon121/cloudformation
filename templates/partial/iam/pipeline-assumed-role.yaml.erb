@@ -2,7 +2,7 @@
     Type: "AWS::IAM::Role"
     Properties:
       Path: "/"
-      RoleName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrole-<%= @tag %>'
+      RoleName: !Sub '${ProjectName}-pipelineassumedrole-<%= @tag %>'
       AssumeRolePolicyDocument:
         Version: "2008-10-17"
         Statement:
@@ -25,7 +25,7 @@
   <%= @roleId %>Policy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: !Sub 'pr-iam-${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
+      PolicyName: !Sub '${ProjectName}-pipelineassumedrolepolicy-<%= @tag %>'
       Roles:
         - Ref: <%= @id %>
       PolicyDocument:
