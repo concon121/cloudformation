@@ -1,0 +1,38 @@
+Parameters:
+  ProjectName:
+    Description: The name of of the project
+    Type: String
+    Default: common
+  RetentionDays:
+    Type: String
+    Description: The number of days to retain snapshots.
+    Default: 7
+Resources:
+
+<%= partial('iam/service-role.yaml.erb',
+            id: 'LambdaServiceRole',
+            name: 'lightsailautosnapshots',
+            services: ['lambda'],
+            policies: ['iam/policies/actions/lightsail.yaml.erb',
+                       'iam/policies/actions/logs.yaml.erb'],
+            serviceName: "lightsail-auto-snapshots") %>
+
+<%= partial('lambda/lambda.yaml.erb',
+            id: 'LightsailAutoSnapshotsLambda',
+            name: 'lightsail-auto-snapshots',
+            description: 'Creates lightsail snapshots',
+            handler: 'lambda_function.lambda_handler',
+            role: '!GetAtt [LambdaServiceRole, Arn]',
+            runtime: 'python2.7',
+            bucket: @lambda_bucket,
+            lambda_version: @lghtsail_auto_snapshots_version,
+            key: 'lightsail-auto-snapshots.zip') %>
+
+Outputs:
+  LightsailAutoSnapshotsLambda:
+    Description: The resource name of the lambda which creates lightsail snapshots
+    Value:
+      Ref: LightsailAutoSnapshotsLambda
+  LightsailAutoSnapshotsLambdaArn:
+    Description: The ARN of the lambda which creates lightsail snapshots
+    Value: !GetAtt [LightsailAutoSnapshotsLambda, Arn]
