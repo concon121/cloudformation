@@ -42,6 +42,7 @@ provider:
 package:
   exclude:
     - .gitignore
+    - README.md
 functions:
   createoriginaccessidentity:
     handler: lambda_function.lambda_handler
