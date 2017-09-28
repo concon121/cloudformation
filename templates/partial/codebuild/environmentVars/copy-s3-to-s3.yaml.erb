@@ -1,8 +1,0 @@
-          - Name: "S3_DEST"
-            Value: !Sub '<%= @dest %>'
-          - Name: "CLOUDFRONT_DIST_ID"
-          <% if @cloudfrontLogicalId && !@cloudfrontLogicalId.nil? %>
-            Value: <%= @cloudfrontLogicalId %>
-          <% else %>
-            Value: 'N/A'
-          <% end %>

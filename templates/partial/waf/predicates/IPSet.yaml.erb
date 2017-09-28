@@ -1,7 +1,0 @@
-  <%= @id %>:
-    Type: "AWS::WAF::IPSet"
-    Properties:
-      IPSetDescriptors: <% @ipSet.each do |ip| %>
-        - Type: <%= ip['type'] %>
-          Value: <%= ip['value'] %> <% end %>
-      Name: !Sub '${ProjectName}-ipset-${AWS::AccountId}-<%= @tag %>'

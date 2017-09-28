@@ -1,7 +1,0 @@
-          - Action:
-              - "logs:CreateLogGroup"
-              - "logs:CreateLogStream"
-              - "logs:PutLogEvents"
-            Resource: <% @services.each do |service| %>
-              - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/<%= service %>/<%= @serviceName %>:log-stream:* <% end %>
-            Effect: "Allow"

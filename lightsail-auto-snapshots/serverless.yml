@@ -1,0 +1,34 @@
+service: lightsail-auto-snapshots
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: eu-west-2
+  variableSyntax: '\${{([\s\S]+?)}}'
+  iamRoleStatements:
+    - Action:
+        - "lightsail:GetInstances"
+        - "lightsail:GetInstanceSnapshots"
+        - "lightsail:CreateInstanceSnapshot"
+        - "lightsail:DeleteInstanceSnapshot"
+      Resource:
+        - "*"
+      Effect: "Allow"
+    - Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource:
+        - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/lightsail-auto-snapshots:log-stream:*
+      Effect: "Allow"
+
+  exclude:
+    - .gitignore
+
+functions:
+  createsnapshots:
+    handler: lambda_function.lambda_handler
+    events:
+      - schedule:
+          rate: rate(1 day)
+          enabled: true
