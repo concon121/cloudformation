@@ -1,0 +1,93 @@
+{
+    "StackEvents": [
+        {
+            "LogicalResourceId": "sqk-accounting",
+            "EventId": "922a6720-9362-11e7-8a05-5081eddf44fe",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462",
+            "ResourceStatus": "ROLLBACK_COMPLETE",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:22:02.609Z",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "ProductionStack",
+            "EventId": "ProductionStack-DELETE_COMPLETE-2017-09-07T00:22:01.865Z",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting-ProductionStack-1Y1YAPWUS8SEI/7b6bf440-9362-11e7-a535-504dcd6ad3ba",
+            "ResourceStatus": "DELETE_COMPLETE",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:22:01.865Z",
+            "ResourceProperties": "{\"TemplateURL\":\"https://s3.amazonaws.com/cf-templates-1dltlmjnkcgt2-eu-west-2/9910f6c241960d5762e3e26348a68228.template\"}\n",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "ProductionStack",
+            "EventId": "ProductionStack-DELETE_IN_PROGRESS-2017-09-07T00:21:50.552Z",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting-ProductionStack-1Y1YAPWUS8SEI/7b6bf440-9362-11e7-a535-504dcd6ad3ba",
+            "ResourceStatus": "DELETE_IN_PROGRESS",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:50.552Z",
+            "ResourceProperties": "{\"TemplateURL\":\"https://s3.amazonaws.com/cf-templates-1dltlmjnkcgt2-eu-west-2/9910f6c241960d5762e3e26348a68228.template\"}\n",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "sqk-accounting",
+            "EventId": "827c45f0-9362-11e7-92d3-50841d800a2a",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462",
+            "ResourceStatusReason": "The following resource(s) failed to create: [ProductionStack]. . Rollback requested by user.",
+            "ResourceStatus": "ROLLBACK_IN_PROGRESS",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:36.303Z",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "ProductionStack",
+            "EventId": "ProductionStack-CREATE_FAILED-2017-09-07T00:21:35.472Z",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting-ProductionStack-1Y1YAPWUS8SEI/7b6bf440-9362-11e7-a535-504dcd6ad3ba",
+            "ResourceStatusReason": "Embedded stack arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting-ProductionStack-1Y1YAPWUS8SEI/7b6bf440-9362-11e7-a535-504dcd6ad3ba was not successfully created: The following resource(s) failed to create: [WordPressDB]. ",
+            "ResourceStatus": "CREATE_FAILED",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:35.472Z",
+            "ResourceProperties": "{\"TemplateURL\":\"https://s3.amazonaws.com/cf-templates-1dltlmjnkcgt2-eu-west-2/9910f6c241960d5762e3e26348a68228.template\"}\n",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "ProductionStack",
+            "EventId": "ProductionStack-CREATE_IN_PROGRESS-2017-09-07T00:21:24.747Z",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting-ProductionStack-1Y1YAPWUS8SEI/7b6bf440-9362-11e7-a535-504dcd6ad3ba",
+            "ResourceStatusReason": "Resource creation Initiated",
+            "ResourceStatus": "CREATE_IN_PROGRESS",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:24.747Z",
+            "ResourceProperties": "{\"TemplateURL\":\"https://s3.amazonaws.com/cf-templates-1dltlmjnkcgt2-eu-west-2/9910f6c241960d5762e3e26348a68228.template\"}\n",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "ProductionStack",
+            "EventId": "ProductionStack-CREATE_IN_PROGRESS-2017-09-07T00:21:23.793Z",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "",
+            "ResourceStatus": "CREATE_IN_PROGRESS",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:23.793Z",
+            "ResourceProperties": "{\"TemplateURL\":\"https://s3.amazonaws.com/cf-templates-1dltlmjnkcgt2-eu-west-2/9910f6c241960d5762e3e26348a68228.template\"}\n",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        },
+        {
+            "LogicalResourceId": "sqk-accounting",
+            "EventId": "78d03ac0-9362-11e7-861e-5081eddf4462",
+            "StackName": "sqk-accounting",
+            "PhysicalResourceId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462",
+            "ResourceStatusReason": "User Initiated",
+            "ResourceStatus": "CREATE_IN_PROGRESS",
+            "ResourceType": "AWS::CloudFormation::Stack",
+            "Timestamp": "2017-09-07T00:21:20.155Z",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462"
+        }
+    ]
+}

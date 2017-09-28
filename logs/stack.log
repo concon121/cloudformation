@@ -1,0 +1,17 @@
+{
+    "Stacks": [
+        {
+            "Tags": [],
+            "Description": "Root stack for sqk-accounting",
+            "CreationTime": "2017-09-07T00:21:20.155Z",
+            "StackId": "arn:aws:cloudformation:eu-west-2:538162597997:stack/sqk-accounting/78cf2950-9362-11e7-861e-5081eddf4462",
+            "NotificationARNs": [],
+            "DisableRollback": false,
+            "StackStatus": "ROLLBACK_COMPLETE",
+            "StackName": "sqk-accounting",
+            "Capabilities": [
+                "CAPABILITY_NAMED_IAM"
+            ]
+        }
+    ]
+}
